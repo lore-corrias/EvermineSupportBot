@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/config" status="WARN" strict="true">
+    <Properties>
+        <Property name="filename">logs/test.log</Property>
+    </Properties>
+    <Appenders>
+        <Appender type="File" name="file" fileName="${filename}">
+            <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
+        </Appender>
+        <Appender type="Console" name="STDOUT">
+            <Layout type="PatternLayout" pattern="[%d{HH:mm:ss.SSS} - %-5p]: %msg%n" />
+        </Appender>
+    </Appenders>
+    <Loggers>
+        <Logger name="eu.evermine.it.EvermineSupportBot" level="INFO">
+            <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="file"/>
+        </Logger>
+        <Root level="INFO">
+            <AppenderRef ref="STDOUT" />
+        </Root>
+    </Loggers>
+</Configuration>
