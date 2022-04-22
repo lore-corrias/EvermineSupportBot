@@ -72,6 +72,7 @@ public class EvermineSupportBot {
             this.languageWrapper = LanguageWrapper.getInstance();
             this.configsWrapper = ConfigsWrapper.getInstance();
             this.staffChatWrapper = StaffChatWrapper.getInstance();
+            getLogger().debug("Configurazioni inizializzate.");
 
             if(botToken == null && botUsername == null) {
                 botToken = configsWrapper.getBotToken();
@@ -83,12 +84,10 @@ public class EvermineSupportBot {
             this.botUsername = botUsername;
 
             this.telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-
-            this.languageWrapper = LanguageWrapper.getInstance();
-            this.configsWrapper = ConfigsWrapper.getInstance();
-            this.staffChatWrapper = StaffChatWrapper.getInstance();
+            getLogger().debug("API configurate.");
 
             this.start();
+            getLogger().debug("Bot avviato.");
         } catch (TelegramApiException e) {
             this.getLogger().error(languageWrapper.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_BOT_INITIALIZATION), e);
         } catch (IOException | IllegalArgumentException e) {

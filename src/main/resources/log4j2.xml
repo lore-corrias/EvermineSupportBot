@@ -8,11 +8,12 @@
             <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
         </Appender>
         <Appender type="Console" name="STDOUT">
-            <Layout type="PatternLayout" pattern="[%d{HH:mm:ss.SSS} - %-5p]: %msg%n" />
+            <Layout type="PatternLayout"
+                    pattern="%highlight{[%d{HH:mm:ss.SSS} - %-5p]: %msg%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=black, DEBUG=green, TRACE=blue}"/>
         </Appender>
     </Appenders>
     <Loggers>
-        <Logger name="eu.evermine.it.EvermineSupportBot" level="INFO">
+        <Logger name="eu.evermine.it.EvermineSupportBot" level="TRACE" additivity="false">
             <AppenderRef ref="STDOUT"/>
             <AppenderRef ref="file"/>
         </Logger>
