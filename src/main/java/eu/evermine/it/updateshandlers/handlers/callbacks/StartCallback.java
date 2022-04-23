@@ -36,7 +36,7 @@ public class StartCallback extends AbstractCallback{
         }
 
         StringBuilder sb = new StringBuilder();
-        String user = getCallbackUserName(update).isEmpty() ? getCallbackFirstName(update) : "@" + getCallbackUserName(update);
+        String user = getCallbackUserName(update) == null ? getCallbackFirstName(update) : "@" + getCallbackUserName(update);
         sb.append(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.START_MESSAGE, List.of(user)));
 
         EditMessageText editMessageText = new EditMessageText();

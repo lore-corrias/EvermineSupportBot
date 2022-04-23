@@ -59,7 +59,7 @@ public class StartCommand implements IBotCommand {
 
         // Messaggio di benvenuto.
         StringBuilder sb = new StringBuilder();
-        String user = message.getFrom().getUserName().isEmpty() ? message.getFrom().getFirstName() : "@" + message.getFrom().getUserName();
+        String user = message.getFrom().getUserName() == null ? message.getFrom().getFirstName() : "@" + message.getFrom().getUserName();
         sb.append(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.START_MESSAGE, List.of(user)));
 
         // Imposto le informazioni relative al messaggio da inviare.
