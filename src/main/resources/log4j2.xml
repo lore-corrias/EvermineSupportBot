@@ -9,7 +9,7 @@
         </Appender>
         <Appender type="Console" name="STDOUT">
             <Layout type="PatternLayout"
-                    pattern="%highlight{[%d{HH:mm:ss.SSS} - %-5p]: %msg%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=black, DEBUG=green, TRACE=blue}"/>
+                    pattern="%highlight{[%d{HH:mm:ss.SSS} - %-5p]: %msg%n}{FATAL=red, ERROR=red, WARN=yellow, INFO=magenta, DEBUG=green, TRACE=white}"/>
         </Appender>
     </Appenders>
     <Loggers>
