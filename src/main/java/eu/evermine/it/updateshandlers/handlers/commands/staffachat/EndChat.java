@@ -45,6 +45,7 @@ public class EndChat implements IBotCommand {
             if(!configs.isAdmin(message.getFrom().getId()))
                 return; // TODO: magari inserire un messaggio "permessi insufficienti"
             SendMessage sendMessage = new SendMessage();
+            sendMessage.setDisableWebPagePreview(true);
             sendMessage.setChatId(message.getChatId().toString());
             sendMessage.setReplyToMessageId(message.getMessageId());
             sendMessage.setParseMode("HTML");
@@ -60,7 +61,9 @@ public class EndChat implements IBotCommand {
                         sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED));
                     }
                     SendMessage sendMessage1 = new SendMessage();
+                    sendMessage1.setDisableWebPagePreview(true);
                     sendMessage1.setChatId(userID.toString());
+                    sendMessage1.setParseMode("HTML");
                     sendMessage1.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED_BY_ADMIN));
                     absSender.execute(sendMessage1);
                 } catch (NumberFormatException e) {

@@ -40,6 +40,7 @@ public class ReloadCommand implements IBotCommand {
         if(!configs.isAdmin(message.getFrom().getId()))
             return;
         SendMessage sendMessage = new SendMessage();
+        sendMessage.setDisableWebPagePreview(true);
         sendMessage.setChatId(String.valueOf(message.getChatId()));
         sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.RELOADED_CONFIGS));
         sendMessage.setReplyToMessageId(message.getMessageId());

@@ -64,9 +64,11 @@ public class StartCommand implements IBotCommand {
 
         // Imposto le informazioni relative al messaggio da inviare.
         SendMessage sendMessage = new SendMessage();
+        sendMessage.setDisableWebPagePreview(true);
         sendMessage.setText(sb.toString());
         sendMessage.enableHtml(true);
         sendMessage.setChatId(message.getFrom().getId().toString());
+        sendMessage.setParseMode("HTML");
 
         // Creo la tastiera inline.
         InlineKeyboardMarkup inlineKeyboardMarkup = language.getKeyboard(LanguageYaml.KEYBOARDS_INDEXES.START_KEYBOARD);

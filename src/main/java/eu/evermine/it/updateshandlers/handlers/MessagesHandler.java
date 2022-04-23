@@ -46,6 +46,7 @@ public class MessagesHandler extends AbstractUpdateHandler {
                         String messageId = button.split(" ")[2];
 
                         SendMessage sendMessage = new SendMessage();
+                        sendMessage.setDisableWebPagePreview(true);
                         sendMessage.setChatId(chatId);
                         try {
                             sendMessage.setReplyToMessageId(Integer.parseInt(messageId));
@@ -71,6 +72,7 @@ public class MessagesHandler extends AbstractUpdateHandler {
             }
         } else if(!configs.isAdmin(update.getMessage().getFrom().getId()) && staffChat.isUserInChat(update.getMessage().getChat().getId())) {
             SendMessage message = new SendMessage();
+            message.setDisableWebPagePreview(true);
             ForwardMessage forwardMessage = new ForwardMessage();
             message.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.MESSAGE_CHAT_STAFF_INCOMING, List.of(update.getMessage().getFrom().getFirstName(), update.getMessage().getFrom().getId().toString())));
             message.setParseMode("HTML");

@@ -43,7 +43,9 @@ public class PardonChat implements IBotCommand {
         if(!configs.isAdmin(message.getFrom().getId()))
             return;
         SendMessage sendMessage = new SendMessage();
+        sendMessage.setDisableWebPagePreview(true);
         sendMessage.setChatId(String.valueOf(message.getChatId()));
+        sendMessage.setParseMode("HTML");
 
         if(arguments.length != 1) {
             sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SYNTAX));
@@ -53,6 +55,7 @@ public class PardonChat implements IBotCommand {
                 try {
                     if(staffChat.isBannedUser(userId)) {
                         SendMessage userMessage = new SendMessage();
+                        userMessage.setDisableWebPagePreview(true);
                         userMessage.setChatId(String.valueOf(userId));
                         userMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_MESSAGE));
                         userMessage.setParseMode("HTML");

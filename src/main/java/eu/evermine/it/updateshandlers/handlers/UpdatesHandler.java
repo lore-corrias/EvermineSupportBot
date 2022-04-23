@@ -121,9 +121,7 @@ public class UpdatesHandler extends TelegramLongPollingCommandBot {
 
     @Override
     public void processNonCommandUpdate(Update update) {
-        long start = System.nanoTime();
         UpdateTypes updateType = this.getUpdateType(update);
-        evermineSupportBot.getLogger().info("Tempo di esecuzione per la definizione di un update di tipo " + updateType + ": " + (System.nanoTime() - start)*1e-6 + "ms");
         if(this.hasUpdateHandler(updateType)) {
             this.updatesHandlers.get(updateType).handleUpdate(update);
         } else if(updateType == null && !this.hasDefaultHandler()) {

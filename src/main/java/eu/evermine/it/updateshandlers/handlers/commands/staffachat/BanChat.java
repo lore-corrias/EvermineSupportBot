@@ -40,13 +40,15 @@ public class BanChat implements IBotCommand {
 
     @Override
     public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        if(!configs.isAdmin(message.getFrom().getId()))
+        if (!configs.isAdmin(message.getFrom().getId()))
             return;
         SendMessage sendMessage = new SendMessage();
+        sendMessage.setDisableWebPagePreview(true);
+        sendMessage.setDisableWebPagePreview(true);
         sendMessage.setChatId(String.valueOf(message.getChatId()));
         sendMessage.setReplyToMessageId(message.getMessageId());
         sendMessage.setParseMode("HTML");
-        if(arguments.length != 1) {
+        if (arguments.length != 1) {
             sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.BAN_CHAT_SYNTAX));
             return;
         }
@@ -57,6 +59,7 @@ public class BanChat implements IBotCommand {
                     sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.BAN_CHAT_ALREADY_BANNED));
                 } else {
                     SendMessage userMessage = new SendMessage();
+                    sendMessage.setDisableWebPagePreview(true);
                     userMessage.setChatId(String.valueOf(userId));
                     userMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.USER_BANNED_MESSAGE));
                     userMessage.setParseMode("HTML");

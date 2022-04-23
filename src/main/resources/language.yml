@@ -60,25 +60,21 @@ language:
     error-remove-banned-user: "Errore durante la rimozione dell'utente dalla lista dei bannati."
     pardon-chat-not-banned: "L'utente fornito non è bannato."
     pardon-chat-success: "Utente sbannato con successo."
+    server-ip-callback-text: "IP del server: mc.evermine.eu"
+    error-callback-server-ip: "Errore durante l'invio della risposta al callback /serverip."
 keyboards:
     start-keyboard:
-        -
-            -
-                text: "Canale Telegram: "
-                url: "https://t.me/EvermineEU"
-            -
-                text: "Sito Web: "
-                url: "https://www.evermine.eu"
-        -
-            -
-                text: "Inizia"
-                callback_data: "start"
-        -
-            -
-                text: "- Status del server -"
-                callback_data: "status"
-        -
-            -
+        - - text: "Canale Telegram: "
+            url: "https://t.me/EvermineEU"
+          - text: "Sito Web: "
+            url: "https://www.evermine.eu"
+        - - text: "IP del server: "
+            callback_data: "serverip"
+        - - text: "Codice del bot: "
+            callback_data: "github.com/justlel/EvermineSupportBot"
+        - - text: "- Status del server -"
+            callback_data: "status"
+        - -
                 text: "- Chat con lo staff -"
                 callback_data: "chat-start"
     back-keyboard:

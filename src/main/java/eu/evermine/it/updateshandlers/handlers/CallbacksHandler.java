@@ -2,10 +2,7 @@ package eu.evermine.it.updateshandlers.handlers;
 
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
-import eu.evermine.it.updateshandlers.handlers.callbacks.AbstractCallback;
-import eu.evermine.it.updateshandlers.handlers.callbacks.ChatStartCallback;
-import eu.evermine.it.updateshandlers.handlers.callbacks.StartCallback;
-import eu.evermine.it.updateshandlers.handlers.callbacks.StatusCallback;
+import eu.evermine.it.updateshandlers.handlers.callbacks.*;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
@@ -31,6 +28,7 @@ public class CallbacksHandler extends AbstractUpdateHandler {
         this.registerCallbackHandler("status", new StatusCallback(this, this.logger, this.language));
         this.registerCallbackHandler("chat-start", new ChatStartCallback(this, this.logger, this.language, this.staffChat));
         this.registerCallbackHandler("start", new StartCallback(this, this.logger, this.language, this.staffChat));
+        this.registerCallbackHandler("serverip", new ServerIpCallback(this, this.logger, this.language));
     }
 
     private void registerCallbackHandler(String callback, AbstractCallback callbackHandler) throws IllegalArgumentException {
