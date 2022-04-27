@@ -1,10 +1,10 @@
 package eu.evermine.it.wrappers;
 
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.YamlManager;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 

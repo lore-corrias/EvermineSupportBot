@@ -64,17 +64,27 @@ language:
     error-callback-server-ip: "Errore durante l'invio della risposta al callback /serverip."
 keyboards:
     start-keyboard:
-        - - text: "Canale Telegram: "
-            url: "https://t.me/EvermineEU"
-          - text: "Sito Web: "
-            url: "https://www.evermine.eu"
-        - - text: "IP del server: "
-            callback_data: "serverip"
-        - - text: "Codice del bot: "
-            callback_data: "github.com/justlel/EvermineSupportBot"
-        - - text: "- Status del server -"
-            callback_data: "status"
-        - -
+        -
+            -
+                text: "Canale Telegram: "
+                url: "https://t.me/EvermineEU"
+            -
+                text: "Sito Web: "
+                url: "https://www.evermine.eu"
+        -
+            -
+                text: "IP del server: "
+                callback_data: "serverip"
+        -
+            -
+                text: "Codice del bot: "
+                callback_data: "github.com/justlel/EvermineSupportBot"
+        -
+            -
+                text: "- Status del server -"
+                callback_data: "status"
+        -
+            -
                 text: "- Chat con lo staff -"
                 callback_data: "chat-start"
     back-keyboard:

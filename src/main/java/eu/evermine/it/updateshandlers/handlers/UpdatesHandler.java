@@ -1,80 +1,98 @@
 package eu.evermine.it.updateshandlers.handlers;
 
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
 import eu.evermine.it.updateshandlers.handlers.commands.ReloadCommand;
 import eu.evermine.it.updateshandlers.handlers.commands.StartCommand;
-import eu.evermine.it.updateshandlers.handlers.commands.staffachat.BanChat;
-import eu.evermine.it.updateshandlers.handlers.commands.staffachat.EndChat;
-import eu.evermine.it.updateshandlers.handlers.commands.staffachat.PardonChat;
-import org.telegram.telegrambots.extensions.bots.commandbot.TelegramLongPollingCommandBot;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import eu.evermine.it.updateshandlers.handlers.commands.staffchat.BanChat;
+import eu.evermine.it.updateshandlers.handlers.commands.staffchat.EndChat;
+import eu.evermine.it.updateshandlers.handlers.commands.staffchat.PardonChat;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
-public class UpdatesHandler extends TelegramLongPollingCommandBot {
+public class UpdatesHandler extends AbstractUpdateHandler {
 
-    public enum UpdateTypes {
-        PRIVATE_MESSAGE(".hasText"),
-        CHANNEL_POST("hasChannelPost"),
-        EDITED_CHANNEL_POST("hasEditedChannelPost"),
-        INLINE_QUERY("hasInlineQuery"),
-        EDITED_MESSAGE("hasEditedMessage"),
-        CHOSEN_INLINE_QUERY("hasChosenInlineQuery"),
-        POLL("hasPoll"),
-        PHOTO(".hasPhoto"),
-        VIDEO(".hasVideo"),
-        ANIMATION(".hasAnimation"),
-        AUDIO(".hasAudio"),
-        DICE(".hasDice"),
-        DOCUMENT(".hasDocument"),
-        INVOICE(".hasInvoice"),
-        STICKER(".hasSticker"),
-        GROUP_MESSAGE(".isGroupMessage"),
-        CHANNEL_MESSAGE(".isChannelMessage"),
-        SUPERGROUP_MESSAGE(".isSuperGroupMessage"),
-        LOCATION(".hasLocation"),
-        GROUP_CHAT_CREATED(".getGroupchatCreated"),
-        SUPERGROUP_CHAT_CREATED(".getSupergroupCreated"),
-        CHANNEL_CHAT_CREATED(".getChannelChatCreated"),
-        CALLBACK_QUERY("hasCallbackQuery"),
-        NEW_CHAT_MEMBER(""),
-        LEFT_CHAT_MEMBER("");
+    private interface UpdateTypes {
+        public String getMethodName();
+    }
 
-        public static List<UpdateTypes> getMediaUpdates() {
-            return new LinkedList<>(List.of(POLL, PHOTO, VIDEO, ANIMATION, AUDIO, DICE, DOCUMENT, INVOICE, STICKER, LOCATION, PRIVATE_MESSAGE));
+    public enum MessageUpdateTypes implements UpdateTypes {
+        POLL,
+        PHOTO,
+        VIDEO,
+        ANIMATION,
+        AUDIO,
+        DICE,
+        INVOICE,
+        STICKER,
+        CHANNEL_CHAT_CREATED,
+        CONTACT,
+        DELETE_CHAT_PHOTO,
+        FORWARD,
+        GAME,
+        GROUP_CHAT_CREATED,
+        LEFT_CHAT_MEMBER,
+        MESSAGE_AUTO_DELETE_TIMER_CHANGED,
+        MIGRATE,
+        NEW_CHAT_PHOTO,
+        NEW_CHAT_TITLE,
+        PASSPORT_DATA,
+        PINNED_MESSAGE,
+        PROXIMITY_ALERT_TRIGGERED,
+        SUCCESSFUL_PAYMENT,
+        SUPERGROUP_CHAT_CREATED,
+        VENUE,
+        VIDEO_NOTE,
+        WEB_APP_DATA,
+        PRIVATE_MESSAGE,
+        GROUP_MESSAGE,
+        SUPERGROUP_MESSAGE;
+
+        public String getMethodName() {
+            StringBuilder sb = new StringBuilder();
+            String[] split = this.name().split("_");
+            sb.append(split[0]);
+            for (int i = 1; i <= split.length; i++) {
+                sb.append(split[i].substring(0, 1).toUpperCase()).append(split[i].substring(1));
+            }
+            return sb.toString();
         }
 
-        public static LinkedList<UpdateTypes> getTextsUpdates() {
-            return new LinkedList<>(List.of(CHANNEL_POST, EDITED_CHANNEL_POST, EDITED_MESSAGE, GROUP_MESSAGE, CHANNEL_MESSAGE, SUPERGROUP_MESSAGE));
+        public static List<MessageUpdateTypes> getMediaUpdates() {
+            return Arrays.asList(POLL, PHOTO, VIDEO, ANIMATION, AUDIO, DICE,
+                    INVOICE, STICKER, VIDEO_NOTE, CONTACT, FORWARD, GAME,
+                    PRIVATE_MESSAGE, GROUP_MESSAGE, SUPERGROUP_MESSAGE
+            );
         }
+    }
 
-        public static LinkedList<UpdateTypes> getNonUserChatUpdates() {
-            return new LinkedList<>(List.of(GROUP_CHAT_CREATED, SUPERGROUP_CHAT_CREATED, CHANNEL_CHAT_CREATED));
-        }
-
-        public static LinkedList<UpdateTypes> getInlineUpdates() {
-            return new LinkedList<>(List.of(INLINE_QUERY, CHOSEN_INLINE_QUERY));
-        }
+    public enum GenericUpdateTypes implements UpdateTypes {
+        EDITED_MESSAGE("editedMessage"),
+        CALLBACK_QUERY("callbackQuery"),
+        CHANNEL_POST("channelPost"),
+        CHAT_JOIN_REQUEST("chatJoinRequest"),
+        CHAT_MEMBER_UPDATED("chatMember"),
+        CHOSEN_INLINE_RESULT("chosenInlineResult"),
+        EDITED_CHANNEL_POST("editedChannelPost"),
+        INLINE_QUERY("inlineQuery"),
+        POLL_ANSWER("pollAnswer"),
+        PRE_SHIPPING_QUERY("preShippingQuery"),
+        CHECKOUT_QUERY("checkoutQuery");
 
         private final String methodName;
 
 
-        UpdateTypes(String methodName) {
+        GenericUpdateTypes(String methodName) {
             this.methodName = methodName;
         }
 
-        public boolean updateMatches(Update update) {
-            try {
-                if(!this.methodName.contains(".")) {
-                    return (boolean) update.getClass().getMethod(this.methodName).invoke(update);
-                } else {
-                    return (boolean) update.getMessage().getClass().getMethod(this.methodName.replace(".", "")).invoke(update.getMessage());
-                }
-            } catch(Exception e) {
-                return false;
-            }
+        public String getMethodName() {
+            return methodName;
         }
     }
 
@@ -101,90 +119,67 @@ public class UpdatesHandler extends TelegramLongPollingCommandBot {
         super.register(new PardonChat(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
         super.register(new ReloadCommand(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
 
-        this.registerNonCommandUpdateHandler(UpdateTypes.CALLBACK_QUERY, new CallbacksHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getStaffChat()));
-        this.registerNonCommandUpdateHandler(List.of(UpdateTypes.GROUP_CHAT_CREATED, UpdateTypes.NEW_CHAT_MEMBER), new GroupJoinHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
-        List<UpdateTypes> registeredMessagesUpdates = new ArrayList<>(UpdateTypes.getMediaUpdates());
-        registeredMessagesUpdates.add(UpdateTypes.GROUP_MESSAGE);
-        registeredMessagesUpdates.add(UpdateTypes.SUPERGROUP_MESSAGE);
-        this.registerNonCommandUpdateHandler(registeredMessagesUpdates, new MessagesHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
-    }
-
-    /**
-     * Getter per l'username del bot.
-     *
-     * @return L'username del bot.
-     */
-    @Override
-    public String getBotUsername() {
-        return this.evermineSupportBot.getBotUsername();
+        this.registerUpdateHandler(GenericUpdateTypes.CALLBACK_QUERY, new CallbacksHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getStaffChat()));
+        this.registerUpdateHandler(List.of(MessageUpdateTypes.GROUP_CHAT_CREATED, MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
+        this.registerUpdateHandler(MessageUpdateTypes.getMediaUpdates(), new MessagesHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
     }
 
     @Override
-    public void processNonCommandUpdate(Update update) {
+    public boolean handleUpdate(Update update) {
         UpdateTypes updateType = this.getUpdateType(update);
         if(this.hasUpdateHandler(updateType)) {
-            this.updatesHandlers.get(updateType).handleUpdate(update);
-        } else if(updateType == null && !this.hasDefaultHandler()) {
-            evermineSupportBot.getLogger().info("Update non gestito: " + update);
+            return this.updatesHandlers.get(updateType).handleUpdate(update);
         } else if(this.hasDefaultHandler()) {
-            this.defaultHandler.handleUpdate(update);
+            return this.defaultHandler.handleUpdate(update);
+        } else if(updateType != null) {
+            evermineSupportBot.getLogger().info("Update non gestito: " + update);
         }
+        return false;
     }
 
     @Nullable
     private UpdateTypes getUpdateType(Update update) {
-        if(update.getMessage() != null) {
-            if(update.getMessage().hasText()) {
-                for(UpdateTypes updateType : UpdateTypes.getTextsUpdates()) {
-                    if(updateType.updateMatches(update))
+        try {
+            if(update.message() != null) {
+                for(MessageUpdateTypes updateType : MessageUpdateTypes.values()) {
+                    boolean check = updateMatchesType(update, updateType);
+                    if(check) {
+                        if(updateType == MessageUpdateTypes.PRIVATE_MESSAGE) {
+                            check = update.message().chat().type().equals(Chat.Type.Private);
+                        } else if(updateType == MessageUpdateTypes.GROUP_MESSAGE) {
+                            check = update.message().chat().type().equals(Chat.Type.group);
+                        } else if(updateType == MessageUpdateTypes.SUPERGROUP_MESSAGE) {
+                            check = update.message().chat().type().equals(Chat.Type.supergroup);
+                        }
+                    }
+                    if(check)
+                        return updateType;
+                }
+            } else {
+                for(GenericUpdateTypes updateType : GenericUpdateTypes.values()) {
+                    if(updateMatchesType(update, updateType))
                         return updateType;
                 }
             }
-            for(UpdateTypes updateType : UpdateTypes.getMediaUpdates()) {
-                if(updateType.updateMatches(update))
-                    return updateType;
-            }
-            for(UpdateTypes updateType : UpdateTypes.getNonUserChatUpdates()) {
-                if (updateType.updateMatches(update))
-                    return updateType;
-            }
-            if(update.getMessage().getLeftChatMember() != null)
-                return UpdateTypes.LEFT_CHAT_MEMBER;
-            if(update.getMessage().getNewChatMembers() != null)
-                return UpdateTypes.NEW_CHAT_MEMBER;
-        } else {
-            for(UpdateTypes updateType : UpdateTypes.getInlineUpdates()) {
-                if(updateType.updateMatches(update))
-                    return updateType;
-            }
-            if(UpdateTypes.CALLBACK_QUERY.updateMatches(update))
-                return UpdateTypes.CALLBACK_QUERY;
+        } catch (Exception e) {
+            evermineSupportBot.getLogger().error("", e);
         }
         return null;
     }
 
-    /**
-     * Getter per il token del bot.
-     *
-     * @return Il token del bot.
-     */
-    @Override
-    public String getBotToken() {
-        return this.evermineSupportBot.getBotToken();
+    private boolean updateMatchesType(Update update, UpdateTypes updateType) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        String propertyName = updateType.getMethodName();
+        Method method = update.getClass().getMethod(propertyName);
+        return method.invoke(update) != null;
     }
 
-    public void registerNonCommandUpdateHandler(List<UpdateTypes> updateTypes, AbstractUpdateHandler abstractUpdateHandler) {
-        updateTypes.forEach(updateType -> this.registerNonCommandUpdateHandler(updateType, abstractUpdateHandler));
+    public void registerUpdateHandler(List<? extends UpdateTypes> updateTypes, AbstractUpdateHandler abstractUpdateHandler) {
+        updateTypes.forEach(updateType -> this.registerUpdateHandler(updateType, abstractUpdateHandler));
     }
 
-    public void registerNonCommandUpdateHandler(UpdateTypes updateType, AbstractUpdateHandler abstractUpdateHandler) {
-        abstractUpdateHandler.setTelegramLongPollingBotInstance(this);
-        this.updatesHandlers.put(updateType, abstractUpdateHandler);
-    }
-
-    public void registerDefaultUpdateHandler(AbstractUpdateHandler abstractUpdateHandler) {
-        abstractUpdateHandler.setTelegramLongPollingBotInstance(this);
-        this.defaultHandler = abstractUpdateHandler;
+    public void registerUpdateHandler(UpdateTypes updateType, AbstractUpdateHandler abstractUpdateHandler) {
+        if(!this.updatesHandlers.containsKey(updateType))
+            this.updatesHandlers.put(updateType, abstractUpdateHandler);
     }
 
     private boolean hasUpdateHandler(UpdateTypes updateType) {

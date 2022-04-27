@@ -2,13 +2,15 @@ package eu.evermine.it.configs.yamls;
 
 
 
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.YamlManager;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import eu.evermine.it.helpers.InlineKeyboardButtonBuilder;
+import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -140,30 +142,25 @@ public class LanguageYaml extends AbstractYaml {
             if (this.inlineKeyboards.containsKey(indexString))
                 return this.inlineKeyboards.get(indexString);
         }
-        List<List<InlineKeyboardButton>> rows = new LinkedList<>();
+        InlineKeyboardButton[][] rows = new InlineKeyboardButton[this.keyboardValues.get(indexString).size()][];
         for (int i = 0; i < this.keyboardValues.get(indexString).size(); i++) {
             List<Map<String, String>> row = this.keyboardValues.get(indexString).get(i);
-            for (Map<String, String> button : row) {
+            for(int j = 0; j < row.size(); j++) {
+                Map<String, String> button = row.get(j);
                 if (!button.containsKey("text") || (!button.containsKey("callback_data") && !button.containsKey("url")))
                     throw new IllegalArgumentException("Il file di lingua deve contenere la chiave \"text\" e uno tra \"callback_data\" e \"url\" per ogni riga della tastiera");
-                InlineKeyboardButton.InlineKeyboardButtonBuilder inlineKeyboardButton = InlineKeyboardButton.builder();
-                inlineKeyboardButton.text(this.replaceArgs(button.get("text"), textArguments));
+                InlineKeyboardButtonBuilder inlineKeyboardButton = InlineKeyboardButtonBuilder.getBuilder();
+                inlineKeyboardButton.setText(this.replaceArgs(button.get("text"), textArguments));
                 if (button.containsKey("callback_data")) {
-                    inlineKeyboardButton.callbackData(this.replaceArgs(button.get("callback_data"), buttonArguments));
+                    inlineKeyboardButton.setCallbackData(this.replaceArgs(button.get("callback_data"), buttonArguments));
                 } else if (button.containsKey("url")) {
-                    inlineKeyboardButton.url(this.replaceArgs(button.get("url"), buttonArguments));
+                    inlineKeyboardButton.setUrl(this.replaceArgs(button.get("url"), buttonArguments));
                 }
-                if (rows.size() <= i)
-                    rows.add(new LinkedList<>());
-                rows.get(i).add(inlineKeyboardButton.build());
+                rows[i][j] = inlineKeyboardButton.buildButton();
             }
         }
-        InlineKeyboardMarkup.InlineKeyboardMarkupBuilder keyboardMarkupBuilder = InlineKeyboardMarkup.builder();
-        for (List<InlineKeyboardButton> row : rows) {
-            keyboardMarkupBuilder.keyboardRow(row);
-        }
-        InlineKeyboardMarkup keyboardMarkup = keyboardMarkupBuilder.build();
-        if (keyboardMarkup != null)
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(rows);
+        if (textArguments != null && buttonArguments != null)
             this.inlineKeyboards.put(indexString, keyboardMarkup);
         return keyboardMarkup;
     }
@@ -237,19 +234,20 @@ public class LanguageYaml extends AbstractYaml {
      * @throws IllegalArgumentException Se uno dei valori definiti nel file Yaml non è del tipo corretto.
      */
     @Override
-    public void checkConfigValidity() throws IllegalArgumentException {
-        InputStream defaultConfig = YamlManager.getResource("language.yml");
-        Yaml yaml = new Yaml(this.getConstructor());
-        LanguageYaml defaultConfigMap = yaml.load(defaultConfig);
+    public void checkConfigValidity() throws IllegalArgumentException, IOException {
+        try (InputStream defaultConfig = YamlManager.getResource("language.yml")) {
+            Yaml yaml = new Yaml(this.getConstructor());
+            LanguageYaml defaultConfigMap = yaml.load(defaultConfig);
 
-        if (defaultConfigMap.getLanguage().keySet().size() > this.getLanguage().keySet().size()) {
-            Set<String> diff = defaultConfigMap.getLanguage().keySet();
-            diff.removeAll(this.getLanguage().keySet());
-            throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi: " + diff);
-        }
-        for (String key : this.getLanguage().keySet()) {
-            if (!this.getLanguage().containsKey(key))
-                throw new IllegalArgumentException("Il file di lingua non è completo, manca la chiave: " + key);
+            if (defaultConfigMap.getLanguage().keySet().size() > this.getLanguage().keySet().size()) {
+                Set<String> diff = defaultConfigMap.getLanguage().keySet();
+                diff.removeAll(this.getLanguage().keySet());
+                throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi: " + diff);
+            }
+            for (String key : this.getLanguage().keySet()) {
+                if (!this.getLanguage().containsKey(key))
+                    throw new IllegalArgumentException("Il file di lingua non è completo, manca la chiave: " + key);
+            }
         }
     }
 

@@ -6,6 +6,8 @@ import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.introspector.PropertyUtils;
 
+import java.io.IOException;
+
 /**
  * Astrazione di un file di configurazione Yaml. Ogni classe che rappresenta uno specifico file config
  * deve obbligatoriamente essere estensione di questa. Inoltre, ogni classe figlia deve necessariamente
@@ -92,8 +94,9 @@ public abstract class AbstractYaml {
      * il metodo può essere sovrascritto in modo che non verifichi nulla.
      *
      * @throws IllegalArgumentException Nel caso in cui il file di configurazione non sia valido.
+     * @throws IOException In caso di errore nella chiusura del file di configurazione.
      */
-    public abstract void checkConfigValidity() throws IllegalArgumentException;
+    public abstract void checkConfigValidity() throws IllegalArgumentException, IOException;
 
     /**
      * Metodo astratto, restituisce una rappresentazione dei dati che possono essere scritti su file.

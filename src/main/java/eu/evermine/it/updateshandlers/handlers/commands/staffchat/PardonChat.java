@@ -1,4 +1,4 @@
-package eu.evermine.it.updateshandlers.handlers.commands.staffachat;
+package eu.evermine.it.updateshandlers.handlers.commands.staffchat;
 
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.wrappers.ConfigsWrapper;

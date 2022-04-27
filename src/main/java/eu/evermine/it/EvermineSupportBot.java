@@ -1,23 +1,23 @@
 package eu.evermine.it;
 
+import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.response.BaseResponse;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
-import eu.evermine.it.updateshandlers.handlers.UpdatesHandler;
+import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.updateshandlers.handlers.GroupJoinHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.TelegramBotsApi;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-
-import javax.annotation.Nullable;
 import java.io.IOException;
 
-public class EvermineSupportBot {
+public class EvermineSupportBot<T extends BaseRequest<T, R>, R extends BaseResponse> {
 
     /**
      * Il token del bot.
@@ -46,10 +46,7 @@ public class EvermineSupportBot {
      *
      */
     private ConfigsYaml configsYaml;
-    /**
-     * Istanza del bot.
-     */
-    private TelegramBotsApi telegramBotsApi;
+    private TelegramBot telegramBot;
 
     /**
      * Logger.
@@ -80,16 +77,12 @@ public class EvermineSupportBot {
                 if(botToken == null || botUsername == null)
                     throw new IllegalArgumentException("Token e username del bot non forniti.");
             }
-            this.botToken = botToken;
-            this.botUsername = botUsername;
 
-            this.telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+            this.telegramBot = new TelegramBot(getBotToken());
             getLogger().debug("API configurate.");
 
             this.start();
             getLogger().debug("Bot avviato.");
-        } catch (TelegramApiException e) {
-            this.getLogger().error(languageWrapper.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_BOT_INITIALIZATION), e);
         } catch (IOException | IllegalArgumentException e) {
             this.getLogger().error("", e);
         }
@@ -101,11 +94,7 @@ public class EvermineSupportBot {
      * @param args Argomenti di avvio del bot. Se avviato correttamente, il primo corrisponde al token del bot, il secondo al suo username e dal terzo in poi la lista degli ID degli admin.
      */
     public static void main(String[] args) {
-        if (args.length == 2) {
-            new EvermineSupportBot(args[0], args[1]);
-        } else {
-            new EvermineSupportBot();
-        }
+        new EvermineSupportBot<>();
     }
 
     /**
@@ -113,11 +102,8 @@ public class EvermineSupportBot {
      *
      */
     private void start() {
-        try {
-            this.setHandler(new UpdatesHandler(this));
-        } catch (TelegramApiException e) {
-            this.getLogger().error(languageWrapper.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_HANDLER_INITIALIZATION), e); // ERROR_HANDLER_INTIIALIZATION
-        }
+        this.telegramBot.setUpdatesListener(new CallbacksHandler(getLogger(), getLanguage(), getStaffChat()));
+        this.telegramBot.setUpdatesListener(new GroupJoinHandler(getLogger(), getLanguage(), getStaffChat()));
     }
 
     /**
@@ -145,7 +131,7 @@ public class EvermineSupportBot {
      * @return Token del bot.
      */
     public String getBotToken() {
-        return botToken;
+        return getConfigs().getBotToken();
     }
 
     /**
@@ -154,7 +140,7 @@ public class EvermineSupportBot {
      * @return Username del bot.
      */
     public String getBotUsername() {
-        return botUsername;
+        return getConfigs().getBotUsername();
     }
 
     public ConfigsWrapper getConfigs() {
@@ -167,5 +153,17 @@ public class EvermineSupportBot {
 
     public LanguageWrapper getLanguage() {
         return languageWrapper;
+    }
+
+    public void execute(T request) {
+        this.telegramBot.execute(request, new Callback<T, R>() {
+            @Override
+            public void onResponse(T t, R r) {}
+
+            @Override
+            public void onFailure(T t, IOException e) {
+                // TODO: logger per le richieste fallite.
+            }
+        });
     }
 }
