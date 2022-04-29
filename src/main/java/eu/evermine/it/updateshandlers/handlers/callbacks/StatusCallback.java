@@ -1,12 +1,12 @@
 package eu.evermine.it.updateshandlers.handlers.callbacks;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -15,10 +15,7 @@ import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public class StatusCallback extends AbstractCallback {
 
@@ -33,7 +30,7 @@ public class StatusCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleCallback(Update update) {
+    public boolean handleUpdate(Update update) {
         boolean status = false;
         int players = 0;
 

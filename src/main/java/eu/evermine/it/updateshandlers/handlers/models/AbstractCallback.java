@@ -1,11 +1,11 @@
-package eu.evermine.it.updateshandlers.handlers.callbacks;
+package eu.evermine.it.updateshandlers.handlers.models;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractCallback {
+public abstract class AbstractCallback implements HandlerInterface {
 
     private final CallbacksHandler callbacksHandler;
 
@@ -14,7 +14,7 @@ public abstract class AbstractCallback {
         this.callbacksHandler = callbacksHandler;
     }
 
-    public abstract boolean handleCallback(Update update);
+    public abstract boolean handleUpdate(Update update);
 
     public Long getCallbackUserID(Update update) {
         return update.callbackQuery().from().id();

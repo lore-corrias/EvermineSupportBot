@@ -1,9 +1,9 @@
 package eu.evermine.it.configs;
 
 import eu.evermine.it.configs.yamls.AbstractYaml;
+import org.jetbrains.annotations.Nullable;
 import org.yaml.snakeyaml.Yaml;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

@@ -2,8 +2,8 @@ package eu.evermine.it.wrappers;
 
 import eu.evermine.it.configs.YamlManager;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 

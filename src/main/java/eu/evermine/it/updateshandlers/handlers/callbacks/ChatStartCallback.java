@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class ChatStartCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleCallback(Update update) {
+    public boolean handleUpdate(Update update) {
         StringBuilder text = new StringBuilder();
         InlineKeyboardMarkup keyboardMarkup = null;
         if(staffChat.isUserInChat(getCallbackUserID(update))) {

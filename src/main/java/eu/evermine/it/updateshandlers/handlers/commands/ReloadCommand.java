@@ -1,56 +1,57 @@
 package eu.evermine.it.updateshandlers.handlers.commands;
 
+import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
+import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import org.slf4j.Logger;
-import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
 
-public class ReloadCommand implements IBotCommand {
+public class ReloadCommand extends AbstractCommand {
 
     private final Logger logger;
     private final LanguageWrapper language;
     private final ConfigsWrapper configs;
 
 
-    public ReloadCommand(Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
+    public ReloadCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
+        super(commandHandler);
+
         this.logger = logger;
         this.language = language;
         this.configs = configs;
     }
 
     @Override
-    public String getCommandIdentifier() {
+    public String getCommandName() {
         return "reload";
     }
 
     @Override
-    public String getDescription() {
+    public String getCommandDescription() {
         return "Reload i file di configurazione.";
     }
 
     @Override
-    public void processMessage(AbsSender absSender, Message message, String[] arguments) {
-        if(!configs.isAdmin(message.getFrom().getId()))
-            return;
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setDisableWebPagePreview(true);
-        sendMessage.setChatId(String.valueOf(message.getChatId()));
-        sendMessage.setText(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.RELOADED_CONFIGS));
-        sendMessage.setReplyToMessageId(message.getMessageId());
-        sendMessage.setParseMode("HTML");
+    public String getCommandUsage() {
+        return "/relaod";
+    }
+
+    @Override
+    public boolean handleUpdate(Update update) {
+        if(!configs.isAdmin(getCommandUserId(update)))
+            return true;
+
         try {
             language.reloadLanguage();
             configs.reloadConfigs();
-            absSender.execute(sendMessage);
-        } catch (TelegramApiException | IOException e) {
+            sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.RELOADED_CONFIGS), getCommandChatId(update), getCommandMessageId(update));
+        } catch (IOException e) {
             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_RELOAD_CONFIGS), e);
         }
+        return true;
     }
 }

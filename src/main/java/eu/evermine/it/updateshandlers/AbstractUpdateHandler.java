@@ -1,55 +1,57 @@
 package eu.evermine.it.updateshandlers;
 
+import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.impl.UpdatesHandler;
+import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
-import com.pengrad.telegrambot.request.AnswerCallbackQuery;
-import com.pengrad.telegrambot.request.EditMessageText;
-import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.BaseResponse;
+import eu.evermine.it.configs.yamls.LanguageYaml;
+import eu.evermine.it.wrappers.LanguageWrapper;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.util.List;
 
-public abstract class AbstractUpdateHandler extends UpdatesHandler {
+public abstract class AbstractUpdateHandler implements UpdatesListener {
 
-    private TelegramBot telegramBotInstance;
+    private final Callback callbackClass;
 
 
-    public AbstractUpdateHandler() {
-        super(0);
+    public AbstractUpdateHandler(Logger logger, LanguageWrapper languageWrapper) {
+        callbackClass = new CallbackClass(logger, languageWrapper);
     }
 
     public int process(List<Update> updates) {
-        int parsedUpdates = 0;
         for (Update update : updates) {
-            if(handleUpdate(update))
-                parsedUpdates++;
+            handleUpdate(update);
         }
-        return parsedUpdates;
+        return CONFIRMED_UPDATES_ALL;
     }
 
     public abstract boolean handleUpdate(Update update);
 
-    public void setTelegramBotInstance(TelegramBot telegramBotInstance) {
-        if(this.telegramBotInstance != null)
-            throw new IllegalStateException();
-        this.telegramBotInstance = telegramBotInstance;
-    }
-
-    public void sendMessage(String text, long chatId, int replyToMessage, @Nullable InlineKeyboardMarkup keyboardMarkup) {
+    public void sendMessage(String text, long chatId, @Nullable Integer replyToMessage, @Nullable InlineKeyboardMarkup keyboardMarkup) {
         SendMessage sendMessage = new SendMessage(chatId, text)
-                .replyToMessageId(replyToMessage)
                 .disableWebPagePreview(true)
                 .parseMode(ParseMode.HTML);
         if(keyboardMarkup != null)
                 sendMessage.replyMarkup(keyboardMarkup);
-        telegramBotInstance.execute(sendMessage);
+        if(replyToMessage != null)
+            sendMessage.replyToMessageId(replyToMessage);
+        System.out.println(getTelegramBotInstance());
+        getTelegramBotInstance().execute(sendMessage, callbackClass);
     }
 
-    public void sendMessage(String text, long chatId, int replyToMessage) {
+    public void sendMessage(String text, long chatId, @Nullable Integer replyToMessage) {
         sendMessage(text, chatId, replyToMessage, null);
+    }
+
+    public void sendMessage(String text, long chatId) {
+        sendMessage(text, chatId, null, null);
     }
 
     public void editMessage(String text, long chatId, int messageId, @Nullable InlineKeyboardMarkup keyboardMarkup) {
@@ -58,7 +60,7 @@ public abstract class AbstractUpdateHandler extends UpdatesHandler {
                 .parseMode(ParseMode.HTML);
         if(keyboardMarkup != null)
             editMessageText.replyMarkup(keyboardMarkup);
-        telegramBotInstance.execute(editMessageText);
+        getTelegramBotInstance().execute(editMessageText, callbackClass);
     }
 
     public void editMessage(String text, long chatId, int messageId) {
@@ -69,6 +71,31 @@ public abstract class AbstractUpdateHandler extends UpdatesHandler {
         AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery(callbackQueryId)
                 .text(text)
                 .showAlert(true);
-        telegramBotInstance.execute(answerCallbackQuery);
+        getTelegramBotInstance().execute(answerCallbackQuery, callbackClass);
     }
+
+    public void leaveChat(Long chatId) {
+        getTelegramBotInstance().execute(new LeaveChat(chatId), callbackClass);
+    }
+
+    public void forwardMessage(Long toChatId, Long fromChatId, Integer messageId) {
+        getTelegramBotInstance().execute(new ForwardMessage(toChatId, fromChatId, messageId), callbackClass);
+    }
+
+    private record CallbackClass(Logger logger, LanguageWrapper languageWrapper) implements Callback {
+
+        @Override
+        public void onResponse(BaseRequest request, BaseResponse response) {
+            logger.trace("onResponse: {}", response);
+        }
+
+        @Override
+        public void onFailure(BaseRequest request, IOException e) {
+            logger.error(languageWrapper.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.REQUEST_FAILURE, List.of(request.toString())), e);
+        }
+    }
+
+    public abstract void setTelegramBotInstance(TelegramBot telegramBot);
+
+    public abstract TelegramBot getTelegramBotInstance();
 }

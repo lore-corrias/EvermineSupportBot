@@ -1,20 +1,18 @@
 package eu.evermine.it.updateshandlers.handlers.commands;
 
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
+import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
-import org.telegram.telegrambots.extensions.bots.commandbot.commands.IBotCommand;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.bots.AbsSender;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
 import java.util.List;
 
-public class StartCommand implements IBotCommand {
+public class StartCommand extends AbstractCommand {
 
     /**
      * Logger del bot.
@@ -35,7 +33,9 @@ public class StartCommand implements IBotCommand {
      * @param logger Logger del bot.
      * @param staffChat Istanza di {@link StaffChatWrapper}.
      */
-    public StartCommand(Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
+    public StartCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
+        super(commandHandler);
+
         this.logger = logger;
         this.language = language;
         this.staffChat = staffChat;
@@ -44,46 +44,31 @@ public class StartCommand implements IBotCommand {
     /**
      * Metodo per processare il comando in arrivo.
      *
-     * @param absSender Istanza di AbsSender, che contiene il metodo per inviare la risposta al comando.
-     * @param message Isntanza di Message, che contiene le informazioni del messaggio ricevuto.
-     * @param arguments Array contenente i parametri del comando.
+     * @param update L'update da processare.
      */
     @Override
-    public void processMessage(AbsSender absSender, Message message, String[] arguments) {
+    public boolean handleUpdate(Update update) {
         // Mi assicuro che l'utente non sia in chat con lo staff
         try {
-            staffChat.removeInChatUser(message.getFrom().getId());
+            staffChat.removeInChatUser(getCommandUserId(update));
         } catch (IOException e) {
             logger.error("", e);
         }
 
         // Messaggio di benvenuto.
-        StringBuilder sb = new StringBuilder();
-        String user = message.getFrom().getUserName() == null ? message.getFrom().getFirstName() : "@" + message.getFrom().getUserName();
-        sb.append(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.START_MESSAGE, List.of(user)));
-
-        // Imposto le informazioni relative al messaggio da inviare.
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setDisableWebPagePreview(true);
-        sendMessage.setText(sb.toString());
-        sendMessage.enableHtml(true);
-        sendMessage.setChatId(message.getFrom().getId().toString());
-        sendMessage.setParseMode("HTML");
+        StringBuilder text = new StringBuilder();
+        String user = getCommandUserName(update) == null ? getCommandUserFirstName(update) : "@" + getCommandUserName(update);
+        text.append(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.START_MESSAGE, List.of(user)));
 
         // Creo la tastiera inline.
         InlineKeyboardMarkup inlineKeyboardMarkup = language.getKeyboard(LanguageYaml.KEYBOARDS_INDEXES.START_KEYBOARD);
-        if (inlineKeyboardMarkup != null) {
-            sendMessage.setReplyMarkup(inlineKeyboardMarkup);
-        } else {
+        if (inlineKeyboardMarkup == null) {
             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.NOT_MATCHING_BUTTONS));
         }
 
         // Invio il messaggio.
-        try {
-            absSender.execute(sendMessage);
-        } catch (TelegramApiException e) {
-            logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_SENDING_START_MESSAGE), e);
-        }
+        sendMessage(text.toString(), getCommandChatId(update), getCommandMessageId(update), inlineKeyboardMarkup);
+        return true;
     }
 
     /**
@@ -92,7 +77,7 @@ public class StartCommand implements IBotCommand {
      * @return Il comando.
      */
     @Override
-    public String getCommandIdentifier() {
+    public String getCommandName() {
         return "start";
     }
 
@@ -102,7 +87,12 @@ public class StartCommand implements IBotCommand {
      * @return La descrizione del comando.
      */
     @Override
-    public String getDescription() {
+    public String getCommandDescription() {
         return "Avvia il bot.";
+    }
+
+    @Override
+    public String getCommandUsage() {
+        return "/start";
     }
 }

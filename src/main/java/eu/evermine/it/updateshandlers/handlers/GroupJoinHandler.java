@@ -1,39 +1,40 @@
 package eu.evermine.it.updateshandlers.handlers;
 
-import eu.evermine.it.configs.yamls.LanguageYaml;
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import org.slf4j.Logger;
-import org.telegram.telegrambots.meta.api.methods.groupadministration.LeaveChat;
-import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
 public class GroupJoinHandler extends AbstractUpdateHandler {
 
-    private final Logger logger;
     private final ConfigsWrapper configs;
-    private final LanguageWrapper language;
+    private TelegramBot bot;
 
+    public GroupJoinHandler(Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
+        super(logger, language);
 
-    public GroupJoinHandler(Logger logger, LanguageWrapper languageWrapper, ConfigsWrapper configs) {
-        this.logger = logger;
         this.configs = configs;
-        this.language = languageWrapper;
     }
 
     @Override
-    public void handleUpdate(Update update) {
-        if(update.getMessage().getChat().getId().equals(configs.getAdminGroupID()))
-            return;
+    public boolean handleUpdate(Update update) {
+        if(update.message().chat().id().equals(configs.getAdminGroupID()))
+            return true;
 
-        LeaveChat leaveChat = new LeaveChat();
-        leaveChat.setChatId(String.valueOf(update.getMessage().getChat().getId()));
-        try {
-            super.execute(leaveChat);
-        } catch (TelegramApiException e) {
-            logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_LEAVING_CHAT_MESSAGE), e);
-        }
+       leaveChat(update.message().chat().id());
+       return true;
+    }
+
+    @Override
+    public TelegramBot getTelegramBotInstance() {
+        return bot;
+    }
+
+    @Override
+    public void setTelegramBotInstance(TelegramBot bot) {
+        this.bot = bot;
     }
 }

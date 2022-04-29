@@ -62,6 +62,7 @@ language:
     pardon-chat-success: "Utente sbannato con successo."
     server-ip-callback-text: "IP del server: mc.evermine.eu"
     error-callback-server-ip: "Errore durante l'invio della risposta al callback /serverip."
+    request-failure: "Errore nell'invio della richiesta alle API: %s."
 keyboards:
     start-keyboard:
         -

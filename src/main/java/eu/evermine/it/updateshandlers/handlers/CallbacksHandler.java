@@ -1,9 +1,11 @@
 package eu.evermine.it.updateshandlers.handlers;
 
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
 import eu.evermine.it.updateshandlers.handlers.callbacks.*;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
@@ -16,9 +18,11 @@ public class CallbacksHandler extends AbstractUpdateHandler {
     private final LinkedHashMap<String, AbstractCallback> callbackHandlers = new LinkedHashMap<>();
 
     private final LanguageWrapper language;
+    private TelegramBot telegramBot;
 
 
     public CallbacksHandler(Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
+        super(logger, language);
         this.language = language;
 
         this.registerCallbackHandler("status", new StatusCallback(this, logger, language));
@@ -51,6 +55,16 @@ public class CallbacksHandler extends AbstractUpdateHandler {
         String callback = update.callbackQuery().data();
         if(!this.hasCallbackHandler(callback))
             return false;
-        return this.getCallbackHandler(callback).handleCallback(update);
+        return this.getCallbackHandler(callback).handleUpdate(update);
+    }
+
+    @Override
+    public void setTelegramBotInstance(TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
+    }
+
+    @Override
+    public TelegramBot getTelegramBotInstance() {
+        return telegramBot;
     }
 }

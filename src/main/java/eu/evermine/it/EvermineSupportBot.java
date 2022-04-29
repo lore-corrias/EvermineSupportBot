@@ -1,14 +1,10 @@
 package eu.evermine.it;
 
-import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.response.BaseResponse;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
-import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
-import eu.evermine.it.updateshandlers.handlers.GroupJoinHandler;
+import eu.evermine.it.updateshandlers.UpdatesHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -17,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
-public class EvermineSupportBot<T extends BaseRequest<T, R>, R extends BaseResponse> {
+public class EvermineSupportBot {
 
     /**
      * Il token del bot.
@@ -94,7 +90,7 @@ public class EvermineSupportBot<T extends BaseRequest<T, R>, R extends BaseRespo
      * @param args Argomenti di avvio del bot. Se avviato correttamente, il primo corrisponde al token del bot, il secondo al suo username e dal terzo in poi la lista degli ID degli admin.
      */
     public static void main(String[] args) {
-        new EvermineSupportBot<>();
+        new EvermineSupportBot();
     }
 
     /**
@@ -102,18 +98,9 @@ public class EvermineSupportBot<T extends BaseRequest<T, R>, R extends BaseRespo
      *
      */
     private void start() {
-        this.telegramBot.setUpdatesListener(new CallbacksHandler(getLogger(), getLanguage(), getStaffChat()));
-        this.telegramBot.setUpdatesListener(new GroupJoinHandler(getLogger(), getLanguage(), getStaffChat()));
-    }
-
-    /**
-     * Metodo per impostare gli handler degli update del bot.
-     *
-     * @param handler Update handler.
-     * @throws TelegramApiException Se si verifica un errore durante l'impostazione dell'handler.
-     */
-    private void setHandler(TelegramLongPollingBot handler) throws TelegramApiException {
-        this.telegramBotsApi.registerBot(handler);
+        UpdatesHandler updatesHandler = new UpdatesHandler(this);
+        updatesHandler.setTelegramBotInstance(telegramBot);
+        this.telegramBot.setUpdatesListener(updatesHandler);
     }
 
     /**
@@ -155,15 +142,7 @@ public class EvermineSupportBot<T extends BaseRequest<T, R>, R extends BaseRespo
         return languageWrapper;
     }
 
-    public void execute(T request) {
-        this.telegramBot.execute(request, new Callback<T, R>() {
-            @Override
-            public void onResponse(T t, R r) {}
-
-            @Override
-            public void onFailure(T t, IOException e) {
-                // TODO: logger per le richieste fallite.
-            }
-        });
+    public TelegramBot getTelegramBot() {
+        return telegramBot;
     }
 }

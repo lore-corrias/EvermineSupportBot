@@ -156,6 +156,8 @@ public class LanguageYaml extends AbstractYaml {
                 } else if (button.containsKey("url")) {
                     inlineKeyboardButton.setUrl(this.replaceArgs(button.get("url"), buttonArguments));
                 }
+                if(rows[i] == null)
+                    rows[i] = new InlineKeyboardButton[row.size()];
                 rows[i][j] = inlineKeyboardButton.buildButton();
             }
         }
@@ -277,7 +279,7 @@ public class LanguageYaml extends AbstractYaml {
         ERROR_CREATING_STAFF_CHAT_CONFIG, END_CHAT_SYNTAX, BAN_CHAT_SYNTAX, PARDON_CHAT_SYNTAX, ERROR_SENDING_CHAT_COMMAND_MESSAGE, END_CHAT_USER_NOT_IN_CHAT,
         END_CHAT_USER_REMOVED, END_CHAT_USER_REMOVED_BY_ADMIN, RELOADED_CONFIGS, ERROR_RELOAD_CONFIGS, ERROR_ADD_BANNED_USERS, BAN_CHAT_ALREADY_BANNED,
         USER_BANNED_MESSAGE, BAN_CHAT_SUCCESS, PARDON_CHAT_MESSAGE, ERROR_REMOVE_BANNED_USER, PARDON_CHAT_NOT_BANNED, PARDON_CHAT_SUCCESS,
-        SERVER_IP_CALLBACK_TEXT, ERROR_CALLBACK_SERVER_IP;
+        SERVER_IP_CALLBACK_TEXT, ERROR_CALLBACK_SERVER_IP, REQUEST_FAILURE;
 
         /**
          * Restituisce, a partire dall'indice, il valore che esso ha nel file Yaml di configurazione.

@@ -1,24 +1,22 @@
-package eu.evermine.it.updateshandlers.handlers;
+package eu.evermine.it.updateshandlers;
 
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.EvermineSupportBot;
-import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
-import eu.evermine.it.updateshandlers.handlers.commands.ReloadCommand;
-import eu.evermine.it.updateshandlers.handlers.commands.StartCommand;
-import eu.evermine.it.updateshandlers.handlers.commands.staffchat.BanChat;
-import eu.evermine.it.updateshandlers.handlers.commands.staffchat.EndChat;
-import eu.evermine.it.updateshandlers.handlers.commands.staffchat.PardonChat;
+import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.updateshandlers.handlers.GroupJoinHandler;
+import eu.evermine.it.updateshandlers.handlers.MessagesHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class UpdatesHandler extends AbstractUpdateHandler {
 
     private interface UpdateTypes {
-        public String getMethodName();
+        String getMethodName();
     }
 
     public enum MessageUpdateTypes implements UpdateTypes {
@@ -33,12 +31,12 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         CHANNEL_CHAT_CREATED,
         CONTACT,
         DELETE_CHAT_PHOTO,
-        FORWARD,
+        FORWARD_FROM,
         GAME,
         GROUP_CHAT_CREATED,
         LEFT_CHAT_MEMBER,
         MESSAGE_AUTO_DELETE_TIMER_CHANGED,
-        MIGRATE,
+        MIGRATE_FROM_CHAT_ID,
         NEW_CHAT_PHOTO,
         NEW_CHAT_TITLE,
         PASSPORT_DATA,
@@ -49,6 +47,7 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         VENUE,
         VIDEO_NOTE,
         WEB_APP_DATA,
+        COMMAND,
         PRIVATE_MESSAGE,
         GROUP_MESSAGE,
         SUPERGROUP_MESSAGE;
@@ -56,16 +55,18 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         public String getMethodName() {
             StringBuilder sb = new StringBuilder();
             String[] split = this.name().split("_");
-            sb.append(split[0]);
-            for (int i = 1; i <= split.length; i++) {
-                sb.append(split[i].substring(0, 1).toUpperCase()).append(split[i].substring(1));
+            sb.append(split[0].toLowerCase());
+            if(split.length == 1)
+                return sb.toString().toLowerCase();
+            for (int i = 1; i < split.length; i++) {
+                sb.append(split[i].substring(0, 1).toUpperCase()).append(split[i].substring(1).toLowerCase());
             }
             return sb.toString();
         }
 
         public static List<MessageUpdateTypes> getMediaUpdates() {
             return Arrays.asList(POLL, PHOTO, VIDEO, ANIMATION, AUDIO, DICE,
-                    INVOICE, STICKER, VIDEO_NOTE, CONTACT, FORWARD, GAME,
+                    INVOICE, STICKER, VIDEO_NOTE, CONTACT, FORWARD_FROM, GAME,
                     PRIVATE_MESSAGE, GROUP_MESSAGE, SUPERGROUP_MESSAGE
             );
         }
@@ -99,6 +100,8 @@ public class UpdatesHandler extends AbstractUpdateHandler {
     private final HashMap<UpdateTypes, AbstractUpdateHandler> updatesHandlers = new LinkedHashMap<>();
     private AbstractUpdateHandler defaultHandler;
 
+    private TelegramBot telegramBot;
+
     /**
      * Istanza di EvermineSupportBot.
      *
@@ -111,14 +114,11 @@ public class UpdatesHandler extends AbstractUpdateHandler {
      * @param evermineSupportBot Istanza della classe EvermineSupportBot.
      */
     public UpdatesHandler(EvermineSupportBot evermineSupportBot) {
+        super(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage());
         this.evermineSupportBot = evermineSupportBot;
+        setTelegramBotInstance(evermineSupportBot.getTelegramBot());
 
-        super.register(new StartCommand(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getStaffChat()));
-        super.register(new EndChat(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
-        super.register(new BanChat(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
-        super.register(new PardonChat(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
-        super.register(new ReloadCommand(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
-
+        this.registerUpdateHandler(MessageUpdateTypes.COMMAND, new CommandHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
         this.registerUpdateHandler(GenericUpdateTypes.CALLBACK_QUERY, new CallbacksHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getStaffChat()));
         this.registerUpdateHandler(List.of(MessageUpdateTypes.GROUP_CHAT_CREATED, MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
         this.registerUpdateHandler(MessageUpdateTypes.getMediaUpdates(), new MessagesHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
@@ -142,15 +142,17 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         try {
             if(update.message() != null) {
                 for(MessageUpdateTypes updateType : MessageUpdateTypes.values()) {
-                    boolean check = updateMatchesType(update, updateType);
-                    if(check) {
-                        if(updateType == MessageUpdateTypes.PRIVATE_MESSAGE) {
-                            check = update.message().chat().type().equals(Chat.Type.Private);
-                        } else if(updateType == MessageUpdateTypes.GROUP_MESSAGE) {
-                            check = update.message().chat().type().equals(Chat.Type.group);
-                        } else if(updateType == MessageUpdateTypes.SUPERGROUP_MESSAGE) {
-                            check = update.message().chat().type().equals(Chat.Type.supergroup);
-                        }
+                    boolean check;
+                    if(updateType == MessageUpdateTypes.PRIVATE_MESSAGE) {
+                        check = update.message().chat().type().equals(Chat.Type.Private);
+                    } else if(updateType == MessageUpdateTypes.GROUP_MESSAGE) {
+                        check = update.message().chat().type().equals(Chat.Type.group);
+                    } else if(updateType == MessageUpdateTypes.SUPERGROUP_MESSAGE) {
+                        check = update.message().chat().type().equals(Chat.Type.supergroup);
+                    } else if(updateType == MessageUpdateTypes.COMMAND) {
+                        check = update.message().text().startsWith("/");
+                    } else {
+                        check = updateMatchesType(update, updateType);
                     }
                     if(check)
                         return updateType;
@@ -169,8 +171,13 @@ public class UpdatesHandler extends AbstractUpdateHandler {
 
     private boolean updateMatchesType(Update update, UpdateTypes updateType) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         String propertyName = updateType.getMethodName();
-        Method method = update.getClass().getMethod(propertyName);
-        return method.invoke(update) != null;
+        boolean check;
+        if(updateType instanceof MessageUpdateTypes) {
+            check = update.message().getClass().getMethod(propertyName).invoke(update.message()) != null;
+        } else {
+            check = update.getClass().getMethod(propertyName).invoke(update) != null;
+        }
+        return check;
     }
 
     public void registerUpdateHandler(List<? extends UpdateTypes> updateTypes, AbstractUpdateHandler abstractUpdateHandler) {
@@ -178,8 +185,10 @@ public class UpdatesHandler extends AbstractUpdateHandler {
     }
 
     public void registerUpdateHandler(UpdateTypes updateType, AbstractUpdateHandler abstractUpdateHandler) {
-        if(!this.updatesHandlers.containsKey(updateType))
+        if(!this.updatesHandlers.containsKey(updateType)) {
+            abstractUpdateHandler.setTelegramBotInstance(getTelegramBotInstance());
             this.updatesHandlers.put(updateType, abstractUpdateHandler);
+        }
     }
 
     private boolean hasUpdateHandler(UpdateTypes updateType) {
@@ -188,5 +197,14 @@ public class UpdatesHandler extends AbstractUpdateHandler {
 
     private boolean hasDefaultHandler() {
         return this.defaultHandler != null;
+    }
+
+    public void setTelegramBotInstance(TelegramBot telegramBotInstance) {
+        this.telegramBot = telegramBotInstance;
+    }
+
+    @Override
+    public TelegramBot getTelegramBotInstance() {
+        return telegramBot;
     }
 }

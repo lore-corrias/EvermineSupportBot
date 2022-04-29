@@ -4,6 +4,7 @@ import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.List;
 
-public class StartCallback extends AbstractCallback{
+public class StartCallback extends AbstractCallback {
 
     private final Logger logger;
     private final LanguageWrapper language;
@@ -26,7 +27,7 @@ public class StartCallback extends AbstractCallback{
     }
 
     @Override
-    public boolean handleCallback(Update update) {
+    public boolean handleUpdate(Update update) {
         try {
             staffChat.removeInChatUser(getCallbackUserID(update));
         } catch (IOException e) {
