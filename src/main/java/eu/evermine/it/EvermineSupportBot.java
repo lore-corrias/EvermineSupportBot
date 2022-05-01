@@ -4,7 +4,11 @@ import com.pengrad.telegrambot.TelegramBot;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
-import eu.evermine.it.updateshandlers.UpdatesHandler;
+import eu.evermine.it.updateshandlers.UpdatesDispatcher;
+import eu.evermine.it.updateshandlers.handlers.CallbacksDispatcher;
+import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
+import eu.evermine.it.updateshandlers.handlers.GroupJoinHandler;
+import eu.evermine.it.updateshandlers.handlers.MessagesHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -12,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.util.List;
 
 public class EvermineSupportBot {
 
@@ -77,9 +82,15 @@ public class EvermineSupportBot {
             this.telegramBot = new TelegramBot(getBotToken());
             getLogger().debug("API configurate.");
 
-            this.start();
+            UpdatesDispatcher updatesDispatcher = new UpdatesDispatcher(this);
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.COMMAND, new CommandDispatcher(getLogger(), getLanguage(), getConfigs(), getStaffChat()));
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.GenericUpdateTypes.CALLBACK_QUERY, new CallbacksDispatcher(getLogger(), getLanguage(), getStaffChat()));
+            updatesDispatcher.registerUpdateHandler(List.of(UpdatesDispatcher.MessageUpdateTypes.GROUP_CHAT_CREATED, UpdatesDispatcher.MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler(getConfigs()));
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.getMediaUpdates(), new MessagesHandler(getLogger(), getLanguage(), getConfigs(), getStaffChat()));
+
+            updatesDispatcher.runUpdateListener();
             getLogger().debug("Bot avviato.");
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException | IllegalArgumentException | IllegalAccessException e) {
             this.getLogger().error("", e);
         }
     }
@@ -91,16 +102,6 @@ public class EvermineSupportBot {
      */
     public static void main(String[] args) {
         new EvermineSupportBot();
-    }
-
-    /**
-     * Metodo per inizializzare gli handler e avviare il bot.
-     *
-     */
-    private void start() {
-        UpdatesHandler updatesHandler = new UpdatesHandler(this);
-        updatesHandler.setTelegramBotInstance(telegramBot);
-        this.telegramBot.setUpdatesListener(updatesHandler);
     }
 
     /**

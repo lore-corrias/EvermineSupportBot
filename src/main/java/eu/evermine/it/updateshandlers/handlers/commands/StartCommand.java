@@ -3,7 +3,8 @@ package eu.evermine.it.updateshandlers.handlers.commands;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -33,8 +34,7 @@ public class StartCommand extends AbstractCommand {
      * @param logger Logger del bot.
      * @param staffChat Istanza di {@link StaffChatWrapper}.
      */
-    public StartCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
-        super(commandHandler);
+    public StartCommand(Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
 
         this.logger = logger;
         this.language = language;
@@ -67,7 +67,7 @@ public class StartCommand extends AbstractCommand {
         }
 
         // Invio il messaggio.
-        sendMessage(text.toString(), getCommandChatId(update), getCommandMessageId(update), inlineKeyboardMarkup);
+        ActionsAPIHelper.sendMessage(text.toString(), getCommandChatId(update), getCommandMessageId(update), inlineKeyboardMarkup);
         return true;
     }
 

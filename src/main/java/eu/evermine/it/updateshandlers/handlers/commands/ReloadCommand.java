@@ -2,7 +2,8 @@ package eu.evermine.it.updateshandlers.handlers.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
@@ -17,9 +18,7 @@ public class ReloadCommand extends AbstractCommand {
     private final ConfigsWrapper configs;
 
 
-    public ReloadCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
-        super(commandHandler);
-
+    public ReloadCommand(Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
         this.logger = logger;
         this.language = language;
         this.configs = configs;
@@ -48,7 +47,7 @@ public class ReloadCommand extends AbstractCommand {
         try {
             language.reloadLanguage();
             configs.reloadConfigs();
-            sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.RELOADED_CONFIGS), getCommandChatId(update), getCommandMessageId(update));
+            ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.RELOADED_CONFIGS), getCommandChatId(update), getCommandMessageId(update));
         } catch (IOException e) {
             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_RELOAD_CONFIGS), e);
         }

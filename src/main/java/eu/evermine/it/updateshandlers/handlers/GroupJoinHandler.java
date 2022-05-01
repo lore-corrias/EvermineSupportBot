@@ -2,20 +2,16 @@ package eu.evermine.it.updateshandlers.handlers;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
-import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.models.handlers.GenericUpdateHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
-import eu.evermine.it.wrappers.LanguageWrapper;
-import org.slf4j.Logger;
 
 
-public class GroupJoinHandler extends AbstractUpdateHandler {
+public class GroupJoinHandler extends GenericUpdateHandler {
 
     private final ConfigsWrapper configs;
-    private TelegramBot bot;
 
-    public GroupJoinHandler(Logger logger, LanguageWrapper language, ConfigsWrapper configs) {
-        super(logger, language);
-
+    public GroupJoinHandler(ConfigsWrapper configs) {
         this.configs = configs;
     }
 
@@ -24,17 +20,7 @@ public class GroupJoinHandler extends AbstractUpdateHandler {
         if(update.message().chat().id().equals(configs.getAdminGroupID()))
             return true;
 
-       leaveChat(update.message().chat().id());
+        ActionsAPIHelper.leaveChat(update.message().chat().id());
        return true;
-    }
-
-    @Override
-    public TelegramBot getTelegramBotInstance() {
-        return bot;
-    }
-
-    @Override
-    public void setTelegramBotInstance(TelegramBot bot) {
-        this.bot = bot;
     }
 }

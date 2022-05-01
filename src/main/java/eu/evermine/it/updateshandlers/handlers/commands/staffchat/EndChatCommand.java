@@ -2,7 +2,8 @@ package eu.evermine.it.updateshandlers.handlers.commands.staffchat;
 
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
@@ -21,9 +22,7 @@ public class EndChatCommand extends AbstractCommand {
 
 
 
-    public EndChatCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, ConfigsWrapper configs, StaffChatWrapper staffChatWrapper) {
-        super(commandHandler);
-
+    public EndChatCommand(Logger logger, LanguageWrapper language, ConfigsWrapper configs, StaffChatWrapper staffChatWrapper) {
         this.logger = logger;
         this.language = language;
         this.configs = configs;
@@ -50,21 +49,21 @@ public class EndChatCommand extends AbstractCommand {
         if(!configs.isAdmin(getCommandUserId(update)))
             return true;
         if(getCommandArguments(update).length != 1) {
-            sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
+            ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
         } else {
             try {
                 Long userID = Long.parseLong(getCommandArguments(update)[0]);
                 if (!staffChat.isUserInChat(userID)) {
-                    sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_NOT_IN_CHAT), getCommandChatId(update), getCommandMessageId(update));
+                    ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_NOT_IN_CHAT), getCommandChatId(update), getCommandMessageId(update));
                 } else {
                     staffChat.removeInChatUser(userID);
-                    sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED), getCommandChatId(update), getCommandMessageId(update));
+                    ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED), getCommandChatId(update), getCommandMessageId(update));
                 }
-                sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED_BY_ADMIN), userID, null);
+                ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_REMOVED_BY_ADMIN), userID, null);
             } catch (NumberFormatException e) {
-                sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_NOT_IN_CHAT), getCommandChatId(update), getCommandMessageId(update));
+                ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.END_CHAT_USER_NOT_IN_CHAT), getCommandChatId(update), getCommandMessageId(update));
             } catch (IOException e) {
-                sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_REMOVING_USER_FROM_STAFF_CHAT_FILE), getCommandChatId(update), getCommandMessageId(update));
+                ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_REMOVING_USER_FROM_STAFF_CHAT_FILE), getCommandChatId(update), getCommandMessageId(update));
                 logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_REMOVING_USER_FROM_STAFF_CHAT_FILE), e);
             }
         }

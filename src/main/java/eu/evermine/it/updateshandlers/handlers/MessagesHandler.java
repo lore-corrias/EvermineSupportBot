@@ -5,7 +5,8 @@ import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.AbstractUpdateHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.models.handlers.GenericUpdateHandler;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -13,18 +14,15 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
-public class MessagesHandler extends AbstractUpdateHandler {
+public class MessagesHandler extends GenericUpdateHandler {
 
     private final Logger logger;
     private final LanguageWrapper language;
     private final ConfigsWrapper configs;
     private final StaffChatWrapper staffChat;
-    private TelegramBot telegramBot;
 
 
     public MessagesHandler(Logger logger, LanguageWrapper language, ConfigsWrapper configs, StaffChatWrapper staffChat) {
-        super(logger, language);
-
         this.logger = logger;
         this.language = language;
         this.configs = configs;
@@ -47,8 +45,8 @@ public class MessagesHandler extends AbstractUpdateHandler {
                         String chatId = button.split(" ")[1];
                         String messageId = button.split(" ")[2];
                         try {
-                            super.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.CHAT_STAFF_RESPONSE), Long.parseLong(chatId), Integer.parseInt(messageId));
-                            super.forwardMessage(update.message().chat().id(), Long.parseLong(chatId), Integer.parseInt(messageId));
+                            ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.CHAT_STAFF_RESPONSE), Long.parseLong(chatId), Integer.parseInt(messageId));
+                            ActionsAPIHelper.forwardMessage(update.message().chat().id(), Long.parseLong(chatId), Integer.parseInt(messageId));
                         } catch (NumberFormatException e) {
                             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_SEND_CHAT_STAFF_RESPONSE), e);
                         }
@@ -62,25 +60,15 @@ public class MessagesHandler extends AbstractUpdateHandler {
             }
 
             if(configs.isAdminGroupSet()) {
-                sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.MESSAGE_CHAT_STAFF_INCOMING, List.of(update.message().from().firstName(), update.message().from().id().toString())), configs.getAdminGroupID(), null, keyboardMarkup);
-                forwardMessage(configs.getAdminGroupID(), update.message().chat().id(), update.message().messageId());
+                ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.MESSAGE_CHAT_STAFF_INCOMING, List.of(update.message().from().firstName(), update.message().from().id().toString())), configs.getAdminGroupID(), null, keyboardMarkup);
+                ActionsAPIHelper.forwardMessage(configs.getAdminGroupID(), update.message().chat().id(), update.message().messageId());
             } else {
                 for(Long adminId : configs.getAdmins()) {
-                    sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.MESSAGE_CHAT_STAFF_INCOMING, List.of(update.message().from().firstName(), update.message().from().id().toString())), adminId, null, keyboardMarkup);
-                    forwardMessage(adminId, update.message().chat().id(), update.message().messageId());
+                    ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.MESSAGE_CHAT_STAFF_INCOMING, List.of(update.message().from().firstName(), update.message().from().id().toString())), adminId, null, keyboardMarkup);
+                    ActionsAPIHelper.forwardMessage(adminId, update.message().chat().id(), update.message().messageId());
                 }
             }
         }
         return true;
-    }
-
-    @Override
-    public void setTelegramBotInstance(TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
-    }
-
-    @Override
-    public TelegramBot getTelegramBotInstance() {
-        return telegramBot;
     }
 }

@@ -1,21 +1,20 @@
 package eu.evermine.it.updateshandlers;
 
-import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.EvermineSupportBot;
-import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
-import eu.evermine.it.updateshandlers.handlers.CommandHandler;
-import eu.evermine.it.updateshandlers.handlers.GroupJoinHandler;
-import eu.evermine.it.updateshandlers.handlers.MessagesHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.models.handlers.AbstractUpdateHandler;
+import eu.evermine.it.updateshandlers.handlers.models.handlers.GenericUpdateHandler;
+import eu.evermine.it.updateshandlers.handlers.models.handlers.SpecificUpdateHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
-public class UpdatesHandler extends AbstractUpdateHandler {
+public class UpdatesDispatcher extends AbstractUpdateDispatcher {
 
-    private interface UpdateTypes {
+    public interface UpdateTypes {
         String getMethodName();
     }
 
@@ -64,7 +63,7 @@ public class UpdatesHandler extends AbstractUpdateHandler {
             return sb.toString();
         }
 
-        public static List<MessageUpdateTypes> getMediaUpdates() {
+        public static List<UpdateTypes> getMediaUpdates() {
             return Arrays.asList(POLL, PHOTO, VIDEO, ANIMATION, AUDIO, DICE,
                     INVOICE, STICKER, VIDEO_NOTE, CONTACT, FORWARD_FROM, GAME,
                     PRIVATE_MESSAGE, GROUP_MESSAGE, SUPERGROUP_MESSAGE
@@ -97,10 +96,10 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         }
     }
 
-    private final HashMap<UpdateTypes, AbstractUpdateHandler> updatesHandlers = new LinkedHashMap<>();
-    private AbstractUpdateHandler defaultHandler;
+    private final HashMap<UpdateTypes, GenericUpdateHandler> genericUpdatesHandlers = new LinkedHashMap<>();
+    private final HashMap<UpdateTypes, SpecificUpdateHandler<?>> specificUpdatesHandlers = new LinkedHashMap<>();
+    private AbstractUpdateHandler defaultUpdatesHandler;
 
-    private TelegramBot telegramBot;
 
     /**
      * Istanza di EvermineSupportBot.
@@ -113,26 +112,21 @@ public class UpdatesHandler extends AbstractUpdateHandler {
      *
      * @param evermineSupportBot Istanza della classe EvermineSupportBot.
      */
-    public UpdatesHandler(EvermineSupportBot evermineSupportBot) {
-        super(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage());
+    public UpdatesDispatcher(EvermineSupportBot evermineSupportBot) throws IllegalAccessException {
         this.evermineSupportBot = evermineSupportBot;
-        setTelegramBotInstance(evermineSupportBot.getTelegramBot());
 
-        this.registerUpdateHandler(MessageUpdateTypes.COMMAND, new CommandHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
-        this.registerUpdateHandler(GenericUpdateTypes.CALLBACK_QUERY, new CallbacksHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getStaffChat()));
-        this.registerUpdateHandler(List.of(MessageUpdateTypes.GROUP_CHAT_CREATED, MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs()));
-        this.registerUpdateHandler(MessageUpdateTypes.getMediaUpdates(), new MessagesHandler(evermineSupportBot.getLogger(), evermineSupportBot.getLanguage(), evermineSupportBot.getConfigs(), evermineSupportBot.getStaffChat()));
+        ActionsAPIHelper.setTelegramBotInstance(evermineSupportBot.getTelegramBot());
     }
 
     @Override
     public boolean handleUpdate(Update update) {
         UpdateTypes updateType = this.getUpdateType(update);
-        if(this.hasUpdateHandler(updateType)) {
-            return this.updatesHandlers.get(updateType).handleUpdate(update);
-        } else if(this.hasDefaultHandler()) {
-            return this.defaultHandler.handleUpdate(update);
-        } else if(updateType != null) {
-            evermineSupportBot.getLogger().info("Update non gestito: " + update);
+        AbstractUpdateHandler updateHandler = this.getUpdateHandler(updateType);
+        if(updateType == null) {
+            evermineSupportBot.getLogger().error("Update non riconosciuto: " + update.toString());
+        }
+        if (updateHandler != null) {
+            return updateHandler.handleUpdate(update);
         }
         return false;
     }
@@ -180,31 +174,44 @@ public class UpdatesHandler extends AbstractUpdateHandler {
         return check;
     }
 
-    public void registerUpdateHandler(List<? extends UpdateTypes> updateTypes, AbstractUpdateHandler abstractUpdateHandler) {
-        updateTypes.forEach(updateType -> this.registerUpdateHandler(updateType, abstractUpdateHandler));
-    }
-
-    public void registerUpdateHandler(UpdateTypes updateType, AbstractUpdateHandler abstractUpdateHandler) {
-        if(!this.updatesHandlers.containsKey(updateType)) {
-            abstractUpdateHandler.setTelegramBotInstance(getTelegramBotInstance());
-            this.updatesHandlers.put(updateType, abstractUpdateHandler);
+    public void registerUpdateHandler(UpdateTypes updateType, AbstractUpdateHandler updateHandler) {
+        if(updateHandler instanceof GenericUpdateHandler) {
+            this.genericUpdatesHandlers.putIfAbsent(updateType, (GenericUpdateHandler) updateHandler);
+        } else if(updateHandler instanceof SpecificUpdateHandler<?>) {
+            this.specificUpdatesHandlers.putIfAbsent(updateType, (SpecificUpdateHandler<?>) updateHandler);
         }
     }
 
+    public void registerUpdateHandler(List<UpdateTypes> types, AbstractUpdateHandler updateHandler) {
+        types.forEach(type -> this.registerUpdateHandler(type, updateHandler));
+    }
+
+    public void registerDefaultUpdatesHandler(AbstractUpdateHandler updateHandler) {
+        if (defaultUpdatesHandler == null)
+            defaultUpdatesHandler = updateHandler;
+    }
+
+    public @Nullable AbstractUpdateHandler getUpdateHandler(UpdateTypes updateType) {
+        if(!hasUpdateHandler(updateType) && !hasDefaultHandler()) {
+            return null;
+        } else if(hasDefaultHandler()) {
+            return this.defaultUpdatesHandler;
+        }
+        if(this.genericUpdatesHandlers.containsKey(updateType)) {
+            return this.genericUpdatesHandlers.get(updateType);
+        }
+        return this.specificUpdatesHandlers.get(updateType);
+    }
+
     private boolean hasUpdateHandler(UpdateTypes updateType) {
-        return this.updatesHandlers.containsKey(updateType);
+        return this.genericUpdatesHandlers.containsKey(updateType) || specificUpdatesHandlers.containsKey(updateType);
     }
 
     private boolean hasDefaultHandler() {
-        return this.defaultHandler != null;
+        return this.defaultUpdatesHandler != null;
     }
 
-    public void setTelegramBotInstance(TelegramBot telegramBotInstance) {
-        this.telegramBot = telegramBotInstance;
-    }
-
-    @Override
-    public TelegramBot getTelegramBotInstance() {
-        return telegramBot;
+    public void runUpdateListener() {
+        evermineSupportBot.getTelegramBot().setUpdatesListener(this);
     }
 }

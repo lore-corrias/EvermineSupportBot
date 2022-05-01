@@ -3,7 +3,7 @@ package eu.evermine.it.updateshandlers.handlers.callbacks;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -18,8 +18,7 @@ public class ChatStartCallback extends AbstractCallback {
     private final StaffChatWrapper staffChat;
 
 
-    public ChatStartCallback(CallbacksHandler callbacksHandler, Logger logger, LanguageWrapper languageWrapper, StaffChatWrapper staffChatWrapper) {
-        super(callbacksHandler);
+    public ChatStartCallback(Logger logger, LanguageWrapper languageWrapper, StaffChatWrapper staffChatWrapper) {
         this.logger = logger;
         this.language = languageWrapper;
         this.staffChat = staffChatWrapper;
@@ -40,7 +39,7 @@ public class ChatStartCallback extends AbstractCallback {
             }
         }
         try {
-            super.editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
+            ActionsAPIHelper.editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
             if (staffChat.isBannedUser(getCallbackUserID(update)))
                 return true;
             if (!staffChat.isUserInChat(getCallbackUserID(update)))

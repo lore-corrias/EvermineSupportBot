@@ -5,7 +5,8 @@ import com.google.gson.JsonParser;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CallbacksDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import okhttp3.OkHttpClient;
@@ -23,8 +24,7 @@ public class StatusCallback extends AbstractCallback {
     private final LanguageWrapper language;
 
 
-    public StatusCallback(CallbacksHandler callbacksHandler, Logger logger, LanguageWrapper language) {
-        super(callbacksHandler);
+    public StatusCallback(Logger logger, LanguageWrapper language) {
         this.logger = logger;
         this.language = language;
     }
@@ -58,7 +58,7 @@ public class StatusCallback extends AbstractCallback {
             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.NOT_MATCHING_BUTTONS));
         }
 
-        editMessage(messageText, getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
+        ActionsAPIHelper.editMessage(messageText, getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
         return true;
     }
 

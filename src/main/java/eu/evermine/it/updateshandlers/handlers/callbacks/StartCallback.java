@@ -3,7 +3,8 @@ package eu.evermine.it.updateshandlers.handlers.callbacks;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CallbacksHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CallbacksDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCallback;
 import eu.evermine.it.wrappers.LanguageWrapper;
 import eu.evermine.it.wrappers.StaffChatWrapper;
@@ -19,8 +20,7 @@ public class StartCallback extends AbstractCallback {
     private final StaffChatWrapper staffChat;
 
 
-    public StartCallback(CallbacksHandler callbacksHandler, Logger logger, LanguageWrapper languageWrapper, StaffChatWrapper staffChatWrapper) {
-        super(callbacksHandler);
+    public StartCallback(Logger logger, LanguageWrapper languageWrapper, StaffChatWrapper staffChatWrapper) {
         this.logger = logger;
         this.language = languageWrapper;
         this.staffChat = staffChatWrapper;
@@ -43,7 +43,7 @@ public class StartCallback extends AbstractCallback {
             logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.NOT_MATCHING_BUTTONS));
         }
 
-        editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), inlineKeyboardMarkup);
+        ActionsAPIHelper.editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), inlineKeyboardMarkup);
         return true;
     }
 

@@ -2,7 +2,8 @@ package eu.evermine.it.updateshandlers.handlers.commands.staffchat;
 
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
-import eu.evermine.it.updateshandlers.handlers.CommandHandler;
+import eu.evermine.it.helpers.ActionsAPIHelper;
+import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
 import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
 import eu.evermine.it.wrappers.ConfigsWrapper;
 import eu.evermine.it.wrappers.LanguageWrapper;
@@ -20,9 +21,7 @@ public class PardonChatCommand extends AbstractCommand {
     private final StaffChatWrapper staffChat;
 
 
-    public PardonChatCommand(CommandHandler commandHandler, Logger logger, LanguageWrapper language, ConfigsWrapper configs, StaffChatWrapper staffChatWrapper) {
-        super(commandHandler);
-
+    public PardonChatCommand(Logger logger, LanguageWrapper language, ConfigsWrapper configs, StaffChatWrapper staffChatWrapper) {
         this.logger = logger;
         this.language = language;
         this.configs = configs;
@@ -50,26 +49,26 @@ public class PardonChatCommand extends AbstractCommand {
             return true;
 
         if(getCommandArguments(update).length != 1) {
-            sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
+            ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
         } else {
             try {
                 Long userId = Long.parseLong(getCommandArguments(update)[0]);
                 try {
                     if(staffChat.isBannedUser(userId)) {
-                        sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_MESSAGE), userId);
+                        ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_MESSAGE), userId);
 
                         if(staffChat.isUserInChat(userId))
                             staffChat.removeInChatUser(userId);
                         staffChat.removeBannedUser(userId);
-                        sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SUCCESS), getCommandChatId(update), getCommandMessageId(update));
+                        ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SUCCESS), getCommandChatId(update), getCommandMessageId(update));
                     } else {
-                        sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_NOT_BANNED), getCommandChatId(update), getCommandMessageId(update));
+                        ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_NOT_BANNED), getCommandChatId(update), getCommandMessageId(update));
                     }
                 } catch (IOException e) {
                     logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.ERROR_REMOVE_BANNED_USER), e);
                 }
             } catch (NumberFormatException e) {
-                sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
+                ActionsAPIHelper.sendMessage(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.PARDON_CHAT_SYNTAX, List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
             }
         }
         return true;
