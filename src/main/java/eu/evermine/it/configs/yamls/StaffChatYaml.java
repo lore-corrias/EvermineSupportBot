@@ -1,9 +1,9 @@
 package eu.evermine.it.configs.yamls;
 
-import org.yaml.snakeyaml.constructor.Constructor;
-import org.yaml.snakeyaml.introspector.Property;
-import org.yaml.snakeyaml.introspector.PropertyUtils;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import eu.evermine.it.configs.YamlManager;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,13 +11,13 @@ import java.util.Map;
 /**
  * Rappresentazione del file Yaml "staff-chat.yml". Contiene le configurazioni per la StaffChat.
  * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
- * implementandone i metodi astratti {@link #getConstructor()}, {@link #checkConfigValidity()} e {@link #getDumpableData()}.
+ * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene solo due valori: "in-chat-users", che rappresenta una lista di utenti
  * attualmente impegnati nella StaffChat, e "banned-users", che rappresenta una lista di utenti banditi
  * dalla StaffChat.
  *
  * @author just
- * @version 1.0
+ * @version 2.0
  * @see AbstractYaml
  */
 public class StaffChatYaml extends AbstractYaml {
@@ -25,10 +25,12 @@ public class StaffChatYaml extends AbstractYaml {
     /**
      * Lista degli ID degli utenti attualmente impegnati nella StaffChat.
      */
+    @JsonProperty("in-chat-users")
     private List<Long> inChatUsers;
     /**
      * Lista degli ID degli utenti banditi dalla StaffChat.
      */
+    @JsonProperty("banned-users")
     private List<Long> bannedUsers;
 
 
@@ -43,13 +45,13 @@ public class StaffChatYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #bannedUsers}.
      *
      * @param bannedUsers La lista che contiene gli ID degli utenti banditi.
      */
-    public void setBanned_users(List<Long> bannedUsers) {
+    public void setBannedUsers(List<Long> bannedUsers) {
         this.bannedUsers = bannedUsers;
     }
 
@@ -63,13 +65,13 @@ public class StaffChatYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #inChatUsers}.
      *
      * @param inChatUsers La lista che contiene gli ID degli utenti impegnati nella StaffChat.
      */
-    public void setIn_chat_users(List<Long> inChatUsers) {
+    public void setInChatUsers(List<Long> inChatUsers) {
         this.inChatUsers = inChatUsers;
     }
 
@@ -89,10 +91,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da aggiungere alla lista.
      */
-    public void addBannedUser(Long userId) {
+    public void addBannedUser(Long userId) throws IOException {
         if (bannedUsers.contains(userId))
             return;
         bannedUsers.add(userId);
+        YamlManager.getInstance().dumpYaml(this);
     }
 
     /**
@@ -112,10 +115,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da rimuovere dalla lista.
      */
-    public void removeBannedUser(Long userId) {
+    public void removeBannedUser(Long userId) throws IOException {
         if (!bannedUsers.contains(userId))
             return;
         bannedUsers.remove(userId);
+        YamlManager.getInstance().dumpYaml(this);
     }
 
     /**
@@ -125,10 +129,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da aggiungere alla lista.
      */
-    public void addInChatUser(Long userId) {
+    public void addInChatUser(Long userId) throws IOException {
         if (inChatUsers.contains(userId))
             return;
         inChatUsers.add(userId);
+        YamlManager.getInstance().dumpYaml(this);
     }
 
     /**
@@ -148,31 +153,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da rimuovere dalla lista.
      */
-    public void removeInChatUser(Long userId) {
+    public void removeInChatUser(Long userId) throws IOException {
         if (!inChatUsers.contains(userId))
             return;
         inChatUsers.remove(userId);
-    }
-
-    /**
-     * Restituisce un {@link Constructor} per la classe {@link AbstractYaml}.
-     * Il Constructor fornito si basa su quello fornito dal metodo {@link AbstractYaml#getCapitalizedConstructor}},
-     * con la differenza che ogni "-" viene sostituito in ogni valore degli index con "_".
-     *
-     * @return Il Constructor per la classe {@link AbstractYaml}.
-     * @see AbstractYaml#getConstructor()
-     */
-    @Override
-    public Constructor getConstructor() {
-        final PropertyUtils propertyUtils = new PropertyUtils() {
-            @Override
-            public Property getProperty(Class<?> type, String name) {
-                return StaffChatYaml.super.getCapitalizedConstructor(this.getClass()).getPropertyUtils().getProperty(type, name.replace("-", "_"));
-            }
-        };
-        Constructor constructor = new Constructor(this.getClass());
-        constructor.setPropertyUtils(propertyUtils);
-        return constructor;
+        YamlManager.getInstance().dumpYaml(this);
     }
 
     /**
@@ -184,7 +169,6 @@ public class StaffChatYaml extends AbstractYaml {
      */
     @Override
     public void checkConfigValidity() throws IllegalArgumentException {
-        // TODO: Implementare il metodo checkConfigValidity() per la classe StaffChatYaml
     }
 
     /**

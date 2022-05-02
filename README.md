@@ -15,7 +15,6 @@ attraverso il Bot direttamente agli admin del server. Le altre funzionalità per
 in tempo reale delle informazioni utili sul server e sui suoi giocatori.
 
 ## Dipendenze
-* [rubenlangus's TelegramBots](https://github.com/rubenlagus/TelegramBots)
+* [pengrad's java-telegram-bot](https://github.com/pengrad/java-telegram-bot-api)
 * [snakeyaml](https://bitbucket.org/snakeyaml/snakeyaml/wiki/Documentation)
-* [okhttp](https://github.com/square/okhttp)
 * [SLF4J-Log4j](https://www.slf4j.org/)

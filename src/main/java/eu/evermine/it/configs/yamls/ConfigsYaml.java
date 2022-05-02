@@ -1,19 +1,19 @@
 package eu.evermine.it.configs.yamls;
 
-import org.yaml.snakeyaml.constructor.Constructor;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Rappresentazione del file Yaml "configs.yml". Contiene le configurazioni per il plugin.
  * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
- * implementandone i metodi astratti {@link #getConstructor()}, {@link #checkConfigValidity()} e {@link #getDumpableData()}.
+ * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene le seguenti informazioni:
  * <ul>
- *     <li>{@link #adminGroupID}: ID dell'eventuale gruppo di amministratori</li>
+ *     <li>{@link #admingroup}: ID dell'eventuale gruppo di amministratori</li>
  *     <li>{@link #admins}: Lista degli ID degli admin del bot</li>
  *     <li>{@link #token}: Il token identificativo del bot</li>
  *     <li>{@link #username}: L'username del bot.</li>
@@ -29,7 +29,7 @@ public class ConfigsYaml extends AbstractYaml {
      * ID dell'eventuale gruppo di amministratori. Nel caso in cui il gruppo non sia stato
      * definito nel file di config, il suo valore sarà null oppure minore di zero.
      */
-    private Long adminGroupID;
+    private Long admingroup;
     /**
      * Lista degli ID degli admin del bot. Gli admin sono utenti che possono eseguire
      * operazioni di amministrazione del bot, tra cui diversi comandi riservati a loro.
@@ -60,14 +60,14 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
-     * Imposta il valore di {@link #adminGroupID}.
+     * Imposta il valore di {@link #admingroup}.
      *
      * @param admingroup L'ID del gruppo di amministratori, se definito.
      */
     public void setAdmingroup(Long admingroup) {
-        this.adminGroupID = admingroup;
+        this.admingroup = admingroup;
     }
 
     /**
@@ -80,15 +80,15 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Restituisce il valore di {@link #adminGroupID}. Se il valore della proprietà
+     * Restituisce il valore di {@link #admingroup}. Se il valore della proprietà
      * è minore di zero o non definito, questo metodo restituisce null.
      *
      * @return L'ID del gruppo di amministratori, se definito, null altrimenti.
      */
     public @Nullable Long getAdminGroupID() {
-        if (this.adminGroupID == -1)
+        if (this.admingroup == -1)
             return null;
-        return adminGroupID;
+        return admingroup;
     }
 
     /**
@@ -112,7 +112,7 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #admins}.
      *
@@ -123,7 +123,7 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #token}.
      *
@@ -134,44 +134,32 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Restituisce il token del bot, se definito, null altrimenti.
+     * Restituisce il token del bot.
      *
-     * @return Il token del bot, se definito, null altrimenti.
+     * @return Il token del bot.
      */
-    public @Nullable String getBotToken() {
+    public String getBotToken() {
         return this.token;
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #username}.
      *
-     * @param username L'username del bot, se definito.
+     * @param username L'username del bot.
      */
     public void setUsername(String username) {
         this.username = username;
     }
 
     /**
-     * Restituisce l'username del bot, se definito, null altrimenti.
+     * Restituisce l'username del bot.
      *
-     * @return L'username del bot, se definito, null altrimenti.
+     * @return L'username del bot.
      */
-    public @Nullable String getBotUsername() {
+    public String getBotUsername() {
         return this.username;
-    }
-
-    /**
-     * Restituisce un {@link Constructor} per la classe {@link AbstractYaml}.
-     * Il Constructor fornito equivale a quello fornito dal metodo {@link AbstractYaml#getCapitalizedConstructor}}.
-     *
-     * @return Il Constructor per la classe {@link AbstractYaml}.
-     * @see AbstractYaml#getConstructor()
-     */
-    @Override
-    public Constructor getConstructor() {
-        return getCapitalizedConstructor(this.getClass());
     }
 
     /**
@@ -183,12 +171,11 @@ public class ConfigsYaml extends AbstractYaml {
      */
     @Override
     public void checkConfigValidity() throws IllegalArgumentException {
-        /*
-        if(this.adminGroupID == null)
-            throw new IllegalArgumentException("L'ID del gruppo admin non può essere nullo.");
-
-         */
-        // TODO: Implementare il metodo checkConfigValidity() per la classe ConfigsYaml
+        try {
+            List.of(this.token, this.username).forEach(Objects::requireNonNull);
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException();
+        }
     }
 
     /**
@@ -206,7 +193,7 @@ public class ConfigsYaml extends AbstractYaml {
     @Override
     public Object getDumpableData() {
         Map<String, Object> data = new HashMap<>();
-        data.put("admingroup", this.adminGroupID);
+        data.put("admingroup", this.admingroup);
         data.put("admins", this.admins);
         data.put("token", this.token);
         data.put("username", this.username);

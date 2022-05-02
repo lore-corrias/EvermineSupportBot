@@ -9,5 +9,8 @@
         <module name="EvermineSupportBot" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="EvermineSupportBot" target="18" />
+    </bytecodeTargetLevel>
   </component>
 </project>

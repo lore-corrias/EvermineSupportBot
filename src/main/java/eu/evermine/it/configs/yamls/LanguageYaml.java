@@ -1,47 +1,51 @@
 package eu.evermine.it.configs.yamls;
 
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.YamlManager;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
+import eu.evermine.it.helpers.InlineKeyboardButtonBuilder;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Rappresentazione del file Yaml "language.yml". Contiene i messaggi utilizzati dal bot.
  * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
- * implementandone i metodi astratti {@link #getConstructor()}, {@link #checkConfigValidity()} e {@link #getDumpableData()}.
+ * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene due indici: "language" e "keyboard". La struttura del file è definita nei commenti di "resources/language.yml".
  * Il primo contiene i messaggi di testo utilizzati dal bot, mentre il secondo i valori delle varie linee delle tastiere inline.
  *
  * @author just
- * @version 1.0
+ * @version 2.0
  * @see AbstractYaml
  */
 public class LanguageYaml extends AbstractYaml {
 
     /**
-     * Mappa che contiene le {@link InlineKeyboardMarkup} generate dal metodo {@link #getKeyboardFromIndex}, a partire
-     * dal valore di {@link #keyboardValues}.
+     * Mappa che contiene le {@link InlineKeyboardMarkup} generate dal metodo {@link #getKeyboard}, a partire
+     * dal valore di {@link #keyboards}.
      */
     private final Map<String, InlineKeyboardMarkup> inlineKeyboards = new HashMap<>();
     /**
      * Mappa che rappresenta tutti i dati relativi ai messaggi utilizzati dal bot nel file Yaml.
      * La chiave è l'indice del messaggio, mentre il valore è il messaggio stesso.
      */
-    private Map<String, String> languageValues;
+    private Map<String, String> language;
     /**
      * Mappa che rappresenta tutti i dati relativi alle linee delle tastiere inline utilizzate dal bot nel file Yaml.
      * La chiave è l'indice della tastiera, mentre il valore è una lista che contiene tutte le righe della tastiera,
      * ognuna delle quali contiene una lista di bottoni. Un bottone è una mappa, che contiene il testo del bottone (indice "text")
      * e il comando associato (indice "callback_data") o eventualmente l'URL (indice "url").
      */
-    private Map<String, List<List<Map<String, String>>>> keyboardValues;
+    private Map<String, List<List<Map<String, String>>>> keyboards;
 
     /**
      * Costruttore della classe. Fornisce alla classe super il nome del file di config,
@@ -54,73 +58,50 @@ public class LanguageYaml extends AbstractYaml {
     }
 
     /**
-     * Restituisce la mappa contenente i messaggi. Vedi {@link #languageValues}.
+     * Restituisce la mappa contenente i messaggi. Vedi {@link #language}.
      *
      * @return La mappa contenente i messaggi.
      */
     public Map<String, String> getLanguage() {
-        return this.languageValues;
+        return this.language;
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
-     * Imposta il valore di {@link #languageValues}.
+     * Imposta il valore di {@link #language}.
      *
      * @param language La mappa che contiene i messaggi.
      */
     public void setLanguage(Map<String, String> language) {
-        this.languageValues = language;
+        this.language = language;
     }
 
     /**
-     * Restituisce la mappa contenente le varie tastiere inline. Vedi {@link #keyboardValues}.
+     * Restituisce la mappa contenente le varie tastiere inline. Vedi {@link #keyboards}.
      *
      * @return La mappa contenente le varie tastiere inline.
      */
     public Map<String, List<List<Map<String, String>>>> getKeyboards() {
-        return this.keyboardValues;
+        return this.keyboards;
     }
 
     /**
-     * Setter utilizzato dalla classe {@link org.yaml.snakeyaml.Yaml} per caricare i valori
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
-     * Imposta il valore di {@link #keyboardValues}.
+     * Imposta il valore di {@link #keyboards}.
      *
      * @param keyboard La mappa che rappresenta le varie tastiere inline..
      */
     public void setKeyboards(Map<String, List<List<Map<String, String>>>> keyboard) {
-        this.keyboardValues = keyboard;
+        this.keyboards = keyboard;
     }
 
-    /**
-     * Restituisce una tastiera inline a partire dall'indice.
-     * Vedi {@link LanguageYaml#getKeyboardFromIndex(KEYBOARDS_INDEXES, List, List)}.
-     *
-     * @param index L'indice della tastiera da restituire.
-     * @return La tastiera inline.
-     */
-    public @Nullable InlineKeyboardMarkup getKeyboardFromIndex(KEYBOARDS_INDEXES index) {
-        return getKeyboardFromIndex(index, null, null);
-    }
-
-    /**
-     * Restituisce una tastiera inline a partire dall'indice, sostituendo eventuali parametri
-     * nel testo dei bottoni della tastiera.
-     * Vedi {@link LanguageYaml#getKeyboardFromIndex(KEYBOARDS_INDEXES, List, List)}.
-     *
-     * @param index         L'indice della tastiera da restituire.
-     * @param textArguments La lista di parametri da sostituire nel testo dei bottoni della tastiera.
-     * @return La tastiera inline.
-     */
-    public @Nullable InlineKeyboardMarkup getKeyboardFromIndex(KEYBOARDS_INDEXES index, List<String> textArguments) {
-        return getKeyboardFromIndex(index, textArguments, null);
-    }
 
     /**
      * Restituisce una tastiera inline a partire dall'indice, sostituendo eventuali parametri
      * nel testo dei bottoni della tastiera e nel comando/URL associato.
-     * Il metodo utilizza la mappa {@link #keyboardValues} per ottenere la tastiera, e sostituisce eventuali
+     * Il metodo utilizza la mappa {@link #keyboards} per ottenere la tastiera, e sostituisce eventuali
      * parametri all'interno del testo o dei bottoni della tastiera con i valori di {@code textArguments} e {@code urlArguments}.
      * Se la tastiera non contiene parametri, i due parametri del metodo sono null, e vengono ignorati.
      * Se la tastiera non contiene parametri, ed è già stata generata, il suo valore è allora conservato in {@link #inlineKeyboards},
@@ -132,55 +113,49 @@ public class LanguageYaml extends AbstractYaml {
      * @return La tastiera inline.
      * @throws IllegalArgumentException Se le liste {@code textArguments} e {@code buttonArguments} non sono delle stesse dimensioni.
      */
-    public @Nullable InlineKeyboardMarkup getKeyboardFromIndex(KEYBOARDS_INDEXES index, @Nullable List<String> textArguments, @Nullable List<String> buttonArguments) throws IllegalArgumentException {
-        String indexString = index.toString();
-        if (!this.keyboardValues.containsKey(indexString))
-            throw new IllegalArgumentException("Il file di lingua non contiene la chiave per la tastiera " + indexString);
+    public @Nullable InlineKeyboardMarkup getKeyboard(String index, @Nullable List<String> textArguments, @Nullable List<String> buttonArguments) {
+        if (!this.keyboards.containsKey(index))
+            throw new IllegalArgumentException("Il file di lingua non contiene la chiave per la tastiera " + index);
         if (textArguments == null && buttonArguments == null) {
-            if (this.inlineKeyboards.containsKey(indexString))
-                return this.inlineKeyboards.get(indexString);
+            if (this.inlineKeyboards.containsKey(index))
+                return this.inlineKeyboards.get(index);
         }
-        List<List<InlineKeyboardButton>> rows = new LinkedList<>();
-        for (int i = 0; i < this.keyboardValues.get(indexString).size(); i++) {
-            List<Map<String, String>> row = this.keyboardValues.get(indexString).get(i);
-            for (Map<String, String> button : row) {
+        InlineKeyboardButton[][] rows = new InlineKeyboardButton[this.keyboards.get(index).size()][];
+        for (int i = 0; i < this.keyboards.get(index).size(); i++) {
+            List<Map<String, String>> row = this.keyboards.get(index).get(i);
+            for (int j = 0; j < row.size(); j++) {
+                Map<String, String> button = row.get(j);
                 if (!button.containsKey("text") || (!button.containsKey("callback_data") && !button.containsKey("url")))
                     throw new IllegalArgumentException("Il file di lingua deve contenere la chiave \"text\" e uno tra \"callback_data\" e \"url\" per ogni riga della tastiera");
-                InlineKeyboardButton.InlineKeyboardButtonBuilder inlineKeyboardButton = InlineKeyboardButton.builder();
-                inlineKeyboardButton.text(this.replaceArgs(button.get("text"), textArguments));
+                InlineKeyboardButtonBuilder inlineKeyboardButton = InlineKeyboardButtonBuilder.getBuilder();
+                inlineKeyboardButton.setText(this.replaceArgs(button.get("text"), textArguments));
                 if (button.containsKey("callback_data")) {
-                    inlineKeyboardButton.callbackData(this.replaceArgs(button.get("callback_data"), buttonArguments));
+                    inlineKeyboardButton.setCallbackData(this.replaceArgs(button.get("callback_data"), buttonArguments));
                 } else if (button.containsKey("url")) {
-                    inlineKeyboardButton.url(this.replaceArgs(button.get("url"), buttonArguments));
+                    inlineKeyboardButton.setUrl(this.replaceArgs(button.get("url"), buttonArguments));
                 }
-                if (rows.size() <= i)
-                    rows.add(new LinkedList<>());
-                rows.get(i).add(inlineKeyboardButton.build());
+                if (rows[i] == null)
+                    rows[i] = new InlineKeyboardButton[row.size()];
+                rows[i][j] = inlineKeyboardButton.buildButton();
             }
         }
-        InlineKeyboardMarkup.InlineKeyboardMarkupBuilder keyboardMarkupBuilder = InlineKeyboardMarkup.builder();
-        for (List<InlineKeyboardButton> row : rows) {
-            keyboardMarkupBuilder.keyboardRow(row);
-        }
-        InlineKeyboardMarkup keyboardMarkup = keyboardMarkupBuilder.build();
-        if (keyboardMarkup != null)
-            this.inlineKeyboards.put(indexString, keyboardMarkup);
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(rows);
+        if (textArguments != null && buttonArguments != null)
+            this.inlineKeyboards.put(index, keyboardMarkup);
         return keyboardMarkup;
     }
 
-    /**
-     * Restituisce un messaggio a partire da un index di {@link LANGUAGE_INDEXES}.
-     * Vedi {@link #getLanguageFromIndex(LANGUAGE_INDEXES, List)}
-     *
-     * @param index L'indice del messaggio da restituire.
-     * @return Il messaggio.
-     */
-    public String getLanguageFromIndex(LANGUAGE_INDEXES index) {
-        return this.getLanguageFromIndex(index, null);
+    public InlineKeyboardMarkup getKeyboard(String index) {
+        return this.getKeyboard(index, null, null);
     }
 
+    public InlineKeyboardMarkup getKeyboard(String index, List<String> textArguments) {
+        return this.getKeyboard(index, textArguments, null);
+    }
+
+
     /**
-     * Restituisce un messaggio a partire da un index di {@link LANGUAGE_INDEXES}, e da una lista di parametri
+     * Restituisce un messaggio a partire da un index, e da una lista di parametri
      * da sostituire nel messaggio, nel caso in cui fosse necessario. Se non sono forniti parametri,
      * allora la lista {@code args} è null, e viene ignorata.
      *
@@ -188,12 +163,16 @@ public class LanguageYaml extends AbstractYaml {
      * @param args  La lista di parametri da sostituire nel messaggio, null se non ci sono parametri.
      * @return Il messaggio.
      */
-    public String getLanguageFromIndex(LANGUAGE_INDEXES index, @Nullable List<String> args) {
-        String s = this.languageValues.get(index.toString());
+    public String getLanguageString(String index, @Nullable List<String> args) {
+        String s = this.language.get(index);
         if (args != null) {
             s = this.replaceArgs(s, args);
         }
         return s;
+    }
+
+    public String getLanguageString(String index) {
+        return getLanguageString(index, null);
     }
 
     /**
@@ -214,18 +193,6 @@ public class LanguageYaml extends AbstractYaml {
     }
 
     /**
-     * Restituisce un {@link Constructor} per la classe {@link AbstractYaml}.
-     * Il Constructor fornito equivale a quello fornito dal metodo {@link AbstractYaml#getCapitalizedConstructor}}.
-     *
-     * @return Il Constructor per la classe {@link AbstractYaml}.
-     * @see AbstractYaml#getConstructor()
-     */
-    @Override
-    public Constructor getConstructor() {
-        return getCapitalizedConstructor(this.getClass());
-    }
-
-    /**
      * Verifica la validità del file di config.
      * Il metodo si assicura che i valori definiti nel file Yaml siano del tipo corretto,
      * in caso contrario, il metodo lancia una IllegalArgumentException.
@@ -237,19 +204,16 @@ public class LanguageYaml extends AbstractYaml {
      * @throws IllegalArgumentException Se uno dei valori definiti nel file Yaml non è del tipo corretto.
      */
     @Override
-    public void checkConfigValidity() throws IllegalArgumentException {
-        InputStream defaultConfig = YamlManager.getResource("language.yml");
-        Yaml yaml = new Yaml(this.getConstructor());
-        LanguageYaml defaultConfigMap = yaml.load(defaultConfig);
+    public void checkConfigValidity() throws IllegalArgumentException, IOException {
+        try (InputStream defaultConfig = YamlManager.getResource("language.yml")) {
+            final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+            LanguageYaml defaultConfigMap = mapper.readValue(defaultConfig, LanguageYaml.class);
 
-        if (defaultConfigMap.getLanguage().keySet().size() > this.getLanguage().keySet().size()) {
-            Set<String> diff = defaultConfigMap.getLanguage().keySet();
-            diff.removeAll(this.getLanguage().keySet());
-            throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi: " + diff);
-        }
-        for (String key : this.getLanguage().keySet()) {
-            if (!this.getLanguage().containsKey(key))
-                throw new IllegalArgumentException("Il file di lingua non è completo, manca la chiave: " + key);
+            if (defaultConfigMap.getLanguage().keySet().size() > this.getLanguage().keySet().size()) {
+                Set<String> diff = defaultConfigMap.getLanguage().keySet();
+                diff.removeAll(this.getLanguage().keySet());
+                throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi: " + diff);
+            }
         }
     }
 
@@ -262,52 +226,9 @@ public class LanguageYaml extends AbstractYaml {
      */
     @Override
     public Object getDumpableData() {
-        return null;
-    }
-
-    /**
-     * Enum che contiene tutti gli indici dei messaggi presenti nel file Yaml.
-     * Un valore dell'enumeratore è definito in modo che risulti uguale all'indice del file Yaml,
-     * ma in maiuscolo e con ogni "-" sostituito da "_".
-     */
-    public enum LANGUAGE_INDEXES {
-        NOT_MATCHING_BUTTONS, ERROR_ADDING_USER_MISSING_CONFIG_FILE, ERROR_REMOVING_USER_MISSING_CONFIG_FILE, ALREADY_IN_CHAT,
-        WELCOME_CHAT_MESSAGE, ERROR_STARTING_CHAT, ERROR_REMOVING_USER_FROM_STAFF_CHAT_FILE, START_MESSAGE, ERROR_CREATING_KEYBOARD_START_MESSAGE,
-        ERROR_EDITING_START_MESSAGE, ERROR_SENDING_START_MESSAGE, ERROR_STATUS_REQUEST, STATUS_SERVER_MESSAGE, ERROR_SEND_STATUS_MESSAGE,
-        ALREADY_SET_CALLBACK, INVALID_HANDLER_CALLBACK, ERROR_LEAVING_CHAT_MESSAGE, LEAVING_CHAT_MESSAGE, CHAT_STAFF_RESPONSE, ERROR_SEND_CHAT_STAFF_RESPONSE,
-        MESSAGE_CHAT_STAFF_INCOMING, ERROR_SEND_STAFF_CHAT_RESPONSE, ERROR_BOT_INITIALIZATION, ERROR_HANDLER_INITIALIZATION, ERROR_CREATING_CONFIG_DIR,
-        ERROR_CREATING_STAFF_CHAT_CONFIG, END_CHAT_SYNTAX, BAN_CHAT_SYNTAX, PARDON_CHAT_SYNTAX, ERROR_SENDING_CHAT_COMMAND_MESSAGE, END_CHAT_USER_NOT_IN_CHAT,
-        END_CHAT_USER_REMOVED, END_CHAT_USER_REMOVED_BY_ADMIN, RELOADED_CONFIGS, ERROR_RELOAD_CONFIGS, ERROR_ADD_BANNED_USERS, BAN_CHAT_ALREADY_BANNED,
-        USER_BANNED_MESSAGE, BAN_CHAT_SUCCESS, PARDON_CHAT_MESSAGE, ERROR_REMOVE_BANNED_USER, PARDON_CHAT_NOT_BANNED, PARDON_CHAT_SUCCESS,
-        SERVER_IP_CALLBACK_TEXT, ERROR_CALLBACK_SERVER_IP;
-
-        /**
-         * Restituisce, a partire dall'indice, il valore che esso ha nel file Yaml di configurazione.
-         *
-         * @return Index del messaggio nel formato del file Yaml.
-         */
-        @Override
-        public String toString() {
-            return super.toString().replace("_", "-").toLowerCase();
-        }
-    }
-
-    /**
-     * Enum che contiene tutti gli indici delle linee delle tastiere inline presenti nel file Yaml.
-     * Un valore dell'enumeratore è definito in modo che risulti uguale all'indice del file Yaml,
-     * ma in maiuscolo e con ogni "-" sostituito da "_".
-     */
-    public enum KEYBOARDS_INDEXES {
-        BACK_KEYBOARD, START_KEYBOARD, STAFF_CHAT_RESPONSE_KEYBOARD;
-
-        /**
-         * Restituisce, a partire dall'indice, il valore che esso ha nel file Yaml di configurazione.
-         *
-         * @return Index del messaggio nel formato del file Yaml.
-         */
-        @Override
-        public String toString() {
-            return super.toString().replace("_", "-").toLowerCase();
-        }
+        Map<String, Map<?, ?>> dump = new HashMap<>();
+        dump.put("language", this.language);
+        dump.put("keyboards", this.keyboards);
+        return dump;
     }
 }
