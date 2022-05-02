@@ -11,90 +11,75 @@
 # che rappresentano un parametro fornito dal bot, ci saranno errori nella visualizzazione.
 
 language:
-    not-matching-buttons: "Il numero di bottoni da creare nella riga non corrisponde al numero degli URL forniti."
-    error-adding-user-missing-config-file: "Impossibile aggiungere l'utente alla chat: il file di config non è stato generato."
-    error-removing-user-missing-config-file: "Impossibile rimuovere l'utente dalla chat: il file di config non è stato generato."
-    already-in-chat: "Sei già in chat con lo staff."
-    welcome-chat-message: "Benvenuto nella chat con lo staff!
+  not-matching-buttons: "Il numero di bottoni da creare nella riga non corrisponde al numero degli URL forniti."
+  error-adding-user-missing-config-file: "Impossibile aggiungere l'utente alla chat: il file di config non è stato generato."
+  error-removing-user-missing-config-file: "Impossibile rimuovere l'utente dalla chat: il file di config non è stato generato."
+  already-in-chat: "Sei già in chat con lo staff."
+  welcome-chat-message: "Benvenuto nella chat con lo staff!
     I messaggi che scriverai da adesso saranno visibili a tutti gli staffer.
     Per uscire dalla chat, clicca il bottone qui sotto."
-    error-creating-staff-chat-config: "Impossibile creare il file di configurazione"
-    error-starting-chat: "Errore nell'avvio della chat con lo staff: "
-    error-adding-user-to-staff-chat-file: "Impossibile inserire l'utente nell'array della staff chat."
-    error-removing-user-from-staff-chat-file: "Impossibile rimuovere l'utente dalla chat."
-    start-message: "<b>Benvenuto,</b> %s,<b> nel bot ufficiale del server Evermine!</b>\n
+  error-creating-staff-chat-config: "Impossibile creare il file di configurazione"
+  error-starting-chat: "Errore nell'avvio della chat con lo staff: "
+  error-adding-user-to-staff-chat-file: "Impossibile inserire l'utente nell'array della staff chat."
+  error-removing-user-from-staff-chat-file: "Impossibile rimuovere l'utente dalla chat."
+  start-message: "<b>Benvenuto,</b> %s,<b> nel bot ufficiale del server Evermine!</b>\n
     Questo bot ti permette di <i>entrare in contatto con gli admin</i> per ricevere assistenza, visualizzare lo <i>stato del server</i> e <b>tanto altro!</b>\n
     Comincia cliccando uno dei <b>bottoni</b> qua sotto!"
-    error-creating-keyboard-start-message: "Impossibile creare la keyboard per il messaggio: %s"
-    error-editing-start-message: "Impossibile modificare il messaggio: "
-    status-server-message: "Stato del server: %s\n
+  error-creating-keyboard-start-message: "Impossibile creare la keyboard per il messaggio: %s"
+  error-editing-start-message: "Impossibile modificare il messaggio: "
+  status-server-message: "Stato del server: %s\n
     Numero di giocatori: %s"
-    error-status-request: "Errore nella richiesta dello status del server: "
-    error-send-status-message: "Errore nell'invio del messaggio di risposta: "
-    error-sending-start-message: "Errore nell'invio della risposta al comando /start"
-    already-set-callback: "Callback \"%s\" già registrato."
-    invalid-handler-callback: "Impossibile registrare un callbackHandler con callback \"%s\": l'handler è invalido."
-    error-leaving-chat-message: "Errore nel tentativo di uscire dalla chat: "
-    leaving-chat-message: "Esco dalla chat: %s"
-    chat-staff-response: "<b>Risposta da un admin: </b>"
-    error-staff-chat-response: "Errore nell'invio della risposta: "
-    message-chat-staff-incoming: "Messaggio in arrivo da %s <i>(%s)</i>:"
-    error-send-staff-chat-response: "Errore nell'invio del messaggio all'admin: "
-    error-bot-initialization: "Errore nell'inizializzazione del bot: "
-    error-handler-initialization: "Errore nell'inizializzazione degli handler: "
-    error-creating-config-dir: "Impossibile creare la cartella config."
-    end-chat-syntax: "Utilizzo corretto del comando: <code>/endchat [USER_ID]</code>"
-    ban-chat-syntax: "Utilizzo corretto del comando: <code>/banchat [USER_ID]</code>"
-    pardon-chat-syntax: "Utilizzo corretto del comando: <code>/pardonchat [USER_ID]</code>"
-    error-sending-chat-command-message: "Errore durante l'invio della risposta al comando per la chat: "
-    end-chat-user-not-in-chat: "L'utente fornito non è attualmente in chat."
-    end-chat-user-removed: "Utente rimosso con successo dalla chat."
-    end-chat-user-removed-by-admin: "Sei stato rimosso dalla chat da un admin."
-    reloaded-configs: "File di config ricaricati."
-    error-reload-configs: "Errore durante il caricamento dei file di config dei messaggi."
-    error-add-banned-user: "Errore durante l'aggiunta dell'utente alla lista dei bannati."
-    ban-chat-already-banned: "L'utente fornito è già bannato."
-    user-banned-message: "Sei stato bannato dalla staff chat."
-    ban-chat-success: "Utente bannato con successo."
-    pardon-chat-message: "Sei stato sbannato dalla staff chat."
-    error-remove-banned-user: "Errore durante la rimozione dell'utente dalla lista dei bannati."
-    pardon-chat-not-banned: "L'utente fornito non è bannato."
-    pardon-chat-success: "Utente sbannato con successo."
-    server-ip-callback-text: "IP del server: mc.evermine.eu"
-    error-callback-server-ip: "Errore durante l'invio della risposta al callback /serverip."
-    request-failure: "Errore nell'invio della richiesta alle API: %s."
+  error-status-request: "Errore nella richiesta dello status del server: "
+  error-send-status-message: "Errore nell'invio del messaggio di risposta: "
+  error-sending-start-message: "Errore nell'invio della risposta al comando /start"
+  already-set-callback: "Callback \"%s\" già registrato."
+  invalid-handler-callback: "Impossibile registrare un callbackHandler con callback \"%s\": l'handler è invalido."
+  error-leaving-chat-message: "Errore nel tentativo di uscire dalla chat: "
+  leaving-chat-message: "Esco dalla chat: %s"
+  chat-staff-response: "<b>Risposta da un admin: </b>"
+  error-staff-chat-response: "Errore nell'invio della risposta: "
+  message-chat-staff-incoming: "Messaggio in arrivo da %s <i>(%s)</i>:"
+  error-send-staff-chat-response: "Errore nell'invio del messaggio all'admin: "
+  error-bot-initialization: "Errore nell'inizializzazione del bot: "
+  error-handler-initialization: "Errore nell'inizializzazione degli handler: "
+  error-creating-config-dir: "Impossibile creare la cartella config."
+  end-chat-syntax: "Utilizzo corretto del comando: <code>/endchat [USER_ID]</code>"
+  ban-chat-syntax: "Utilizzo corretto del comando: <code>/banchat [USER_ID]</code>"
+  pardon-chat-syntax: "Utilizzo corretto del comando: <code>/pardonchat [USER_ID]</code>"
+  error-sending-chat-command-message: "Errore durante l'invio della risposta al comando per la chat: "
+  end-chat-user-not-in-chat: "L'utente fornito non è attualmente in chat."
+  end-chat-user-removed: "Utente rimosso con successo dalla chat."
+  end-chat-user-removed-by-admin: "Sei stato rimosso dalla chat da un admin."
+  reloaded-configs: "File di config ricaricati."
+  error-reload-configs: "Errore durante il caricamento dei file di config dei messaggi."
+  error-add-banned-user: "Errore durante l'aggiunta dell'utente alla lista dei bannati."
+  ban-chat-already-banned: "L'utente fornito è già bannato."
+  user-banned-message: "Sei stato bannato dalla staff chat."
+  ban-chat-success: "Utente bannato con successo."
+  pardon-chat-message: "Sei stato sbannato dalla staff chat."
+  error-remove-banned-user: "Errore durante la rimozione dell'utente dalla lista dei bannati."
+  pardon-chat-not-banned: "L'utente fornito non è bannato."
+  pardon-chat-success: "Utente sbannato con successo."
+  server-ip-callback-text: "IP del server: mc.evermine.eu"
+  error-callback-server-ip: "Errore durante l'invio della risposta al callback /serverip."
+  request-failure: "Errore nell'invio della richiesta alle API: %s."
 keyboards:
-    start-keyboard:
-        -
-            -
-                text: "Canale Telegram: "
-                url: "https://t.me/EvermineEU"
-            -
-                text: "Sito Web: "
-                url: "https://www.evermine.eu"
-        -
-            -
-                text: "IP del server: "
-                callback_data: "serverip"
-        -
-            -
-                text: "Codice del bot: "
-                callback_data: "github.com/justlel/EvermineSupportBot"
-        -
-            -
-                text: "- Status del server -"
-                callback_data: "status"
-        -
-            -
-                text: "- Chat con lo staff -"
-                callback_data: "chat-start"
-    back-keyboard:
-        -
-            -
-                text: "Torna Indietro"
-                callback_data: "start"
-    staff-chat-response-keyboard:
-        -
-            -
-                text: "Rispondi a questo messaggio per rispondere!"
-                callback_data: "reply-message-chat %s %s"
+  start-keyboard:
+    - - text: "Canale Telegram: "
+        url: "https://t.me/EvermineEU"
+      - text: "Sito Web: "
+        url: "https://www.evermine.eu"
+    - - text: "IP del server: "
+        callback_data: "serverip"
+    - - text: "Codice del bot: "
+        callback_data: "github.com/justlel/EvermineSupportBot"
+    - - text: "- Status del server -"
+        callback_data: "status"
+    - - text: "- Chat con lo staff -"
+        callback_data: "chat-start"
+  back-keyboard:
+    - - text: "Torna Indietro"
+        callback_data: "start"
+  staff-chat-response-keyboard:
+    - - text: "Rispondi a questo messaggio per rispondere!"
+        callback_data: "reply-message-chat %s %s"

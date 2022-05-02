@@ -1,4 +1,4 @@
-package eu.evermine.it.updateshandlers.handlers.models.handlers;
+package eu.evermine.it.updatesdispatcher.handlers;
 
 import com.pengrad.telegrambot.model.Update;
 import org.jetbrains.annotations.Nullable;

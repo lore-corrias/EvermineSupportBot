@@ -1,13 +1,11 @@
-package eu.evermine.it.updateshandlers.handlers.commands;
+package eu.evermine.it.handlers.commands;
 
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.configs.yamls.LanguageYaml;
+import eu.evermine.it.configs.yamls.StaffChatYaml;
+import eu.evermine.it.handlers.models.AbstractCommand;
 import eu.evermine.it.helpers.ActionsAPIHelper;
-import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
-import eu.evermine.it.updateshandlers.handlers.models.AbstractCommand;
-import eu.evermine.it.wrappers.LanguageWrapper;
-import eu.evermine.it.wrappers.StaffChatWrapper;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -20,21 +18,21 @@ public class StartCommand extends AbstractCommand {
      */
     private final Logger logger;
     /**
-     * Wrapper della classe {@link eu.evermine.it.configs.yamls.StaffChatYaml}.
+     * Istanza della classe {@link eu.evermine.it.configs.yamls.StaffChatYaml}.
      */
-    private final StaffChatWrapper staffChat;
+    private final StaffChatYaml staffChat;
     /**
-     * Wrapper della classe {@link eu.evermine.it.configs.yamls.LanguageYaml}.
+     * Istanza della classe {@link eu.evermine.it.configs.yamls.LanguageYaml}.
      */
-    private final LanguageWrapper language;
+    private final LanguageYaml language;
 
     /**
      * Costruttore della classe.
-     * 
-     * @param logger Logger del bot.
-     * @param staffChat Istanza di {@link StaffChatWrapper}.
+     *
+     * @param logger    Logger del bot.
+     * @param staffChat Istanza di {@link StaffChatYaml}.
      */
-    public StartCommand(Logger logger, LanguageWrapper language, StaffChatWrapper staffChat) {
+    public StartCommand(Logger logger, LanguageYaml language, StaffChatYaml staffChat) {
 
         this.logger = logger;
         this.language = language;
@@ -58,37 +56,17 @@ public class StartCommand extends AbstractCommand {
         // Messaggio di benvenuto.
         StringBuilder text = new StringBuilder();
         String user = getCommandUserName(update) == null ? getCommandUserFirstName(update) : "@" + getCommandUserName(update);
-        text.append(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.START_MESSAGE, List.of(user)));
+        text.append(language.getLanguageString("start-message", List.of(user)));
 
         // Creo la tastiera inline.
-        InlineKeyboardMarkup inlineKeyboardMarkup = language.getKeyboard(LanguageYaml.KEYBOARDS_INDEXES.START_KEYBOARD);
+        InlineKeyboardMarkup inlineKeyboardMarkup = language.getKeyboard("start-keyboard");
         if (inlineKeyboardMarkup == null) {
-            logger.error(language.getLanguageString(LanguageYaml.LANGUAGE_INDEXES.NOT_MATCHING_BUTTONS));
+            logger.error(language.getLanguageString("not-matching-buttons"));
         }
 
         // Invio il messaggio.
         ActionsAPIHelper.sendMessage(text.toString(), getCommandChatId(update), getCommandMessageId(update), inlineKeyboardMarkup);
         return true;
-    }
-
-    /**
-     * Getter del comando.
-     *
-     * @return Il comando.
-     */
-    @Override
-    public String getCommandName() {
-        return "start";
-    }
-
-    /**
-     * Descrizione del comando.
-     *
-     * @return La descrizione del comando.
-     */
-    @Override
-    public String getCommandDescription() {
-        return "Avvia il bot.";
     }
 
     @Override

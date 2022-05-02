@@ -1,4 +1,4 @@
-package eu.evermine.it.updateshandlers;
+package eu.evermine.it.updatesdispatcher;
 
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;

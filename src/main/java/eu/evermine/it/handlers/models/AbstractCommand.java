@@ -1,11 +1,7 @@
-package eu.evermine.it.updateshandlers.handlers.models;
+package eu.evermine.it.handlers.models;
 
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import eu.evermine.it.helpers.ActionsAPIHelper;
-import eu.evermine.it.updateshandlers.handlers.CommandDispatcher;
-import eu.evermine.it.updateshandlers.handlers.models.handlers.HandlerInterface;
-import org.jetbrains.annotations.Nullable;
+import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
 
 public abstract class AbstractCommand implements HandlerInterface {
 
@@ -36,10 +32,6 @@ public abstract class AbstractCommand implements HandlerInterface {
         System.arraycopy(split, 1, args, 0, args.length);
         return args;
     }
-
-    public abstract String getCommandName();
-
-    public abstract String getCommandDescription();
 
     public abstract String getCommandUsage();
 }

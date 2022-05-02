@@ -1,8 +1,9 @@
 package eu.evermine.it.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import eu.evermine.it.configs.yamls.AbstractYaml;
 import org.jetbrains.annotations.Nullable;
-import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,18 +20,18 @@ import java.util.Objects;
  * Il metodo responsabile per il dump di un oggetto in un file Yaml è {@link #dumpYaml}.
  * I file di config predefiniti vengono ottenuti dalla cartella "resources" attraverso il metodo {@link #getResource}
  *
- * @param <T> Tipo dell'oggetto su cui caricare il file Yaml.
  * @author just
- * @version 1.0
+ * @version 2.0
  * @see AbstractYaml
  */
-public class YamlManager<T extends AbstractYaml> {
+public class YamlManager {
 
     /**
      * Istanza di YamlManager. Se definita, viene utilizzata, altrimenti viene creata una nuova istanza
      * dal metodo {@link #getInstance}.
      */
-    private static YamlManager<?> yamlManager;
+    private static YamlManager yamlManager;
+    private final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
 
     /**
@@ -40,9 +41,9 @@ public class YamlManager<T extends AbstractYaml> {
      *
      * @throws IllegalAccessException Se la classe viene istanziata una seconda volta.
      */
-    private YamlManager() throws IllegalArgumentException {
+    private YamlManager() throws IllegalAccessException {
         if (yamlManager != null)
-            throw new IllegalArgumentException("YamlLoader non può essere istanziato.");
+            throw new IllegalAccessException("YamlLoader non può essere istanziato.");
         yamlManager = this;
     }
 
@@ -51,9 +52,13 @@ public class YamlManager<T extends AbstractYaml> {
      *
      * @return L'istanza di YamlManager.
      */
-    public static YamlManager<?> getInstance() {
-        if (yamlManager == null)
-            return new YamlManager<>();
+    public static YamlManager getInstance() {
+        if (yamlManager == null) {
+            try {
+                return new YamlManager();
+            } catch (IllegalAccessException ignored) {
+            }
+        }
         return yamlManager;
     }
 
@@ -85,14 +90,13 @@ public class YamlManager<T extends AbstractYaml> {
      *
      * @param abstractYaml Oggetto che rappresenta un file Yaml.
      * @return L'oggetto popolato con i dati del file Yaml.
-     * @throws IOException Se il file Yaml non è presente nella cartella resources.
+     * @throws IOException              Se il file Yaml non è presente nella cartella resources.
      * @throws IllegalArgumentException Se il file Yaml non è valido.
      */
-    public T loadYaml(AbstractYaml abstractYaml) throws IOException, IllegalArgumentException {
+    public AbstractYaml loadYaml(AbstractYaml abstractYaml) throws IOException, IllegalArgumentException {
         this.validateConfig(abstractYaml.getFilename());
-        Yaml yaml = new Yaml(abstractYaml.getConstructor());
+        AbstractYaml loadedYaml = mapper.readValue(Files.newBufferedReader(Path.of("config/" + abstractYaml.getFilename())), abstractYaml.getClass());
 
-        T loadedYaml = yaml.load(Files.newBufferedReader(Path.of("config/" + abstractYaml.getFilename())));
         loadedYaml.checkConfigValidity();
         return loadedYaml;
     }
@@ -105,18 +109,16 @@ public class YamlManager<T extends AbstractYaml> {
      * I dati da caricare all'interno del file Yaml vengono forniti dal metodo {@link AbstractYaml#getDumpableData}.
      * Se il metodo getDumpableData restituisce null, e quindi la classe non ha dati da salvare,
      * viene lanciata un'eccezione.
-     * La stringa di valori del file Yaml viene scritta nel file "config/filename",
-     * dopo essere stata ricavata dal metodo {@link Yaml#dump}.
+     * La stringa di valori del file Yaml viene scritta nel file "config/filename".
      *
      * @param abstractYaml Oggetto che rappresenta un file Yaml.
-     * @throws IOException In caso di errore nella scrittura su file.
+     * @throws IOException              In caso di errore nella scrittura su file.
      * @throws IllegalArgumentException Se l'oggetto non presenta dati da scrivere.
      */
     public void dumpYaml(AbstractYaml abstractYaml) throws IOException, IllegalArgumentException {
-        Yaml yaml = new Yaml();
         if (abstractYaml.getDumpableData() == null)
             throw new IllegalArgumentException("Dumpable data non definito");
-        Files.writeString(Path.of("config/" + abstractYaml.getFilename()), yaml.dump(abstractYaml.getDumpableData()));
+        mapper.writeValue(new File("config/" + abstractYaml.getFilename()), abstractYaml.getDumpableData());
     }
 
     /**
@@ -127,7 +129,7 @@ public class YamlManager<T extends AbstractYaml> {
      *
      * @param filename Nome del file Yaml.
      * @throws IllegalArgumentException Se il file Yaml non è trovato nella cartella resources.
-     * @throws IOException In caso di errori nella scrittura su file/creazione delle cartelle.
+     * @throws IOException              In caso di errori nella scrittura su file/creazione delle cartelle.
      */
     private void validateConfig(String filename) throws IllegalArgumentException, IOException {
         File configFile = new File(Path.of("config/" + filename).toString());

@@ -8,7 +8,8 @@ public class InlineKeyboardButtonBuilder {
     private String url;
     private String callbackData;
 
-    private InlineKeyboardButtonBuilder() {}
+    private InlineKeyboardButtonBuilder() {
+    }
 
     public static InlineKeyboardButtonBuilder getBuilder() {
         return new InlineKeyboardButtonBuilder();
@@ -30,9 +31,9 @@ public class InlineKeyboardButtonBuilder {
     }
 
     public InlineKeyboardButton buildButton() {
-        if(text == null || (callbackData == null && url == null))
+        if (text == null || (callbackData == null && url == null))
             throw new IllegalArgumentException();
-        if(callbackData != null) {
+        if (callbackData != null) {
             return new InlineKeyboardButton(text).callbackData(callbackData);
         } else {
             return new InlineKeyboardButton(text).url(url);

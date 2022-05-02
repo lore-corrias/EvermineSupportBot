@@ -1,10 +1,9 @@
-package eu.evermine.it.updateshandlers.handlers.models;
+package eu.evermine.it.handlers.models;
 
 import com.pengrad.telegrambot.model.Update;
-import eu.evermine.it.updateshandlers.handlers.models.handlers.HandlerInterface;
+import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
 
 public abstract class AbstractCallback implements HandlerInterface {
-
 
 
     public abstract boolean handleUpdate(Update update);
