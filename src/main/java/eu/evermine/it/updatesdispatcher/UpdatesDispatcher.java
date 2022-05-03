@@ -1,5 +1,6 @@
 package eu.evermine.it.updatesdispatcher;
 
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.EvermineSupportBot;
@@ -17,8 +18,14 @@ import java.util.List;
 
 public class UpdatesDispatcher extends AbstractUpdateDispatcher {
 
-    public interface UpdateTypes {
-        String getMethodName();
+    private final HashMap<UpdateTypes, GenericUpdateHandler> genericUpdatesHandlers = new LinkedHashMap<>();
+    private final HashMap<UpdateTypes, SpecificUpdateHandler<?>> specificUpdatesHandlers = new LinkedHashMap<>();
+    private AbstractUpdateHandler defaultUpdatesHandler;
+
+    /**
+     * Costruttore per l'handler CommandsHandler, che gestisce i comandi in arrivo.
+     */
+    public UpdatesDispatcher() throws IllegalAccessException {
     }
 
     @Override
@@ -26,58 +33,12 @@ public class UpdatesDispatcher extends AbstractUpdateDispatcher {
         UpdateTypes updateType = this.getUpdateType(update);
         AbstractUpdateHandler updateHandler = this.getUpdateHandler(updateType);
         if (updateType == null) {
-            evermineSupportBot.getLogger().error("Update non riconosciuto: " + update.toString());
+            EvermineSupportBot.logger.error("Update non riconosciuto: " + update.toString());
         }
         if (updateHandler != null) {
             return updateHandler.handleUpdate(update);
         }
         return false;
-    }
-
-    public enum GenericUpdateTypes implements UpdateTypes {
-        EDITED_MESSAGE("editedMessage"),
-        CALLBACK_QUERY("callbackQuery"),
-        CHANNEL_POST("channelPost"),
-        CHAT_JOIN_REQUEST("chatJoinRequest"),
-        CHAT_MEMBER_UPDATED("chatMember"),
-        CHOSEN_INLINE_RESULT("chosenInlineResult"),
-        EDITED_CHANNEL_POST("editedChannelPost"),
-        INLINE_QUERY("inlineQuery"),
-        POLL_ANSWER("pollAnswer"),
-        PRE_SHIPPING_QUERY("preShippingQuery"),
-        CHECKOUT_QUERY("checkoutQuery");
-
-        private final String methodName;
-
-
-        GenericUpdateTypes(String methodName) {
-            this.methodName = methodName;
-        }
-
-        public String getMethodName() {
-            return methodName;
-        }
-    }
-
-    private final HashMap<UpdateTypes, GenericUpdateHandler> genericUpdatesHandlers = new LinkedHashMap<>();
-    private final HashMap<UpdateTypes, SpecificUpdateHandler<?>> specificUpdatesHandlers = new LinkedHashMap<>();
-    private AbstractUpdateHandler defaultUpdatesHandler;
-
-
-    /**
-     * Istanza di EvermineSupportBot.
-     */
-    private final EvermineSupportBot evermineSupportBot;
-
-    /**
-     * Costruttore per l'handler CommandsHandler, che gestisce i comandi in arrivo.
-     *
-     * @param evermineSupportBot Istanza della classe EvermineSupportBot.
-     */
-    public UpdatesDispatcher(EvermineSupportBot evermineSupportBot) throws IllegalAccessException {
-        this.evermineSupportBot = evermineSupportBot;
-
-        ActionsAPIHelper.setTelegramBotInstance(evermineSupportBot.getTelegramBot());
     }
 
     @Nullable
@@ -107,7 +68,7 @@ public class UpdatesDispatcher extends AbstractUpdateDispatcher {
                 }
             }
         } catch (Exception e) {
-            evermineSupportBot.getLogger().error("", e);
+            EvermineSupportBot.logger.error("", e);
         }
         return null;
     }
@@ -150,6 +111,44 @@ public class UpdatesDispatcher extends AbstractUpdateDispatcher {
     public void registerDefaultUpdatesHandler(AbstractUpdateHandler updateHandler) {
         if (defaultUpdatesHandler == null)
             defaultUpdatesHandler = updateHandler;
+    }
+
+    private boolean hasUpdateHandler(UpdateTypes updateType) {
+        return this.genericUpdatesHandlers.containsKey(updateType) || specificUpdatesHandlers.containsKey(updateType);
+    }
+
+    private boolean hasDefaultHandler() {
+        return this.defaultUpdatesHandler != null;
+    }
+
+    public void runUpdateListener(TelegramBot telegramBot) throws IllegalAccessException {
+        ActionsAPIHelper.setTelegramBotInstance(telegramBot);
+        telegramBot.setUpdatesListener(this);
+    }
+
+    public enum GenericUpdateTypes implements UpdateTypes {
+        EDITED_MESSAGE("editedMessage"),
+        CALLBACK_QUERY("callbackQuery"),
+        CHANNEL_POST("channelPost"),
+        CHAT_JOIN_REQUEST("chatJoinRequest"),
+        CHAT_MEMBER_UPDATED("chatMember"),
+        CHOSEN_INLINE_RESULT("chosenInlineResult"),
+        EDITED_CHANNEL_POST("editedChannelPost"),
+        INLINE_QUERY("inlineQuery"),
+        POLL_ANSWER("pollAnswer"),
+        PRE_SHIPPING_QUERY("preShippingQuery"),
+        CHECKOUT_QUERY("checkoutQuery");
+
+        private final String methodName;
+
+
+        GenericUpdateTypes(String methodName) {
+            this.methodName = methodName;
+        }
+
+        public String getMethodName() {
+            return methodName;
+        }
     }
 
     public enum MessageUpdateTypes implements UpdateTypes {
@@ -205,15 +204,7 @@ public class UpdatesDispatcher extends AbstractUpdateDispatcher {
         }
     }
 
-    private boolean hasUpdateHandler(UpdateTypes updateType) {
-        return this.genericUpdatesHandlers.containsKey(updateType) || specificUpdatesHandlers.containsKey(updateType);
-    }
-
-    private boolean hasDefaultHandler() {
-        return this.defaultUpdatesHandler != null;
-    }
-
-    public void runUpdateListener() {
-        evermineSupportBot.getTelegramBot().setUpdatesListener(this);
+    public interface UpdateTypes {
+        String getMethodName();
     }
 }

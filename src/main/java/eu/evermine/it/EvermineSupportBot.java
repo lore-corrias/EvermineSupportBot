@@ -19,28 +19,9 @@ import java.util.List;
 public class EvermineSupportBot {
 
     /**
-     * Il token del bot.
-     */
-    private String botToken;
-    /**
-     * L'username del bot.
-     */
-    private String botUsername;
-    /**
-     * Istanza della classe {@link LanguageYaml}, per gestire i messaggi.
-     */
-    private LanguageYaml languageYaml;
-    /**
-     * Istanza della classe {@link ConfigsYaml}, per gestire le configurazioni principali.
-     */
-    private ConfigsYaml configsYaml;
-    private StaffChatYaml staffChatYaml;
-    private TelegramBot telegramBot;
-
-    /**
      * Logger.
      */
-    private final Logger LOGGER = LoggerFactory.getLogger(EvermineSupportBot.class);
+    public static final Logger logger = LoggerFactory.getLogger(EvermineSupportBot.class);
 
 
     /**
@@ -48,28 +29,25 @@ public class EvermineSupportBot {
      */
     private EvermineSupportBot() {
         try {
-            this.languageYaml = (LanguageYaml) YamlManager.getInstance().loadYaml(new LanguageYaml());
-            this.configsYaml = (ConfigsYaml) YamlManager.getInstance().loadYaml(new ConfigsYaml());
-            this.staffChatYaml = (StaffChatYaml) YamlManager.getInstance().loadYaml(new StaffChatYaml());
-            getLogger().debug("Configurazioni inizializzate.");
+            loadConfigurations();
+            EvermineSupportBot.logger.debug("Configurazioni inizializzate.");
 
-            if (getConfigs().getBotToken().isEmpty() || getConfigs().getBotUsername().isEmpty()) {
+            if (ConfigsYaml.getBotToken().isEmpty() || ConfigsYaml.getBotUsername().isEmpty()) {
                 throw new IllegalArgumentException("Token o username del bot non impostati.");
             }
 
-            this.telegramBot = new TelegramBot(getBotToken());
-            getLogger().debug("API configurate.");
+            EvermineSupportBot.logger.debug("API configurate.");
 
-            UpdatesDispatcher updatesDispatcher = new UpdatesDispatcher(this);
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.COMMAND, new CommandDispatcher(getLogger(), getLanguage(), getConfigs(), getStaffChat(), this));
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.GenericUpdateTypes.CALLBACK_QUERY, new CallbacksDispatcher(getLogger(), getLanguage(), getStaffChat()));
-            updatesDispatcher.registerUpdateHandler(List.of(UpdatesDispatcher.MessageUpdateTypes.GROUP_CHAT_CREATED, UpdatesDispatcher.MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler(getConfigs()));
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.getMediaUpdates(), new MessagesHandler(getLogger(), getLanguage(), getConfigs(), getStaffChat()));
+            UpdatesDispatcher updatesDispatcher = new UpdatesDispatcher();
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.COMMAND, new CommandDispatcher());
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.GenericUpdateTypes.CALLBACK_QUERY, new CallbacksDispatcher());
+            updatesDispatcher.registerUpdateHandler(List.of(UpdatesDispatcher.MessageUpdateTypes.GROUP_CHAT_CREATED, UpdatesDispatcher.MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler());
+            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.getMediaUpdates(), new MessagesHandler());
 
-            updatesDispatcher.runUpdateListener();
-            getLogger().debug("Bot avviato.");
+            updatesDispatcher.runUpdateListener(new TelegramBot(ConfigsYaml.getBotToken()));
+            EvermineSupportBot.logger.debug("Bot avviato.");
         } catch (IOException | IllegalArgumentException | IllegalAccessException e) {
-            this.getLogger().error("", e);
+            EvermineSupportBot.logger.error("", e);
         }
     }
 
@@ -82,54 +60,11 @@ public class EvermineSupportBot {
         new EvermineSupportBot();
     }
 
-    /**
-     * Getter per il logger del bot.
-     *
-     * @return Logger del bot.
-     */
-    public Logger getLogger() {
-        return LOGGER;
-    }
-
-    /**
-     * Getter per il token del bot.
-     *
-     * @return Token del bot.
-     */
-    public String getBotToken() {
-        return getConfigs().getBotToken();
-    }
-
-    /**
-     * Getter per l'username del bot.
-     *
-     * @return Username del bot.
-     */
-    public String getBotUsername() {
-        return getConfigs().getBotUsername();
-    }
-
-    public ConfigsYaml getConfigs() {
-        return configsYaml;
-    }
-
-    public StaffChatYaml getStaffChat() {
-        return staffChatYaml;
-    }
-
-    public LanguageYaml getLanguage() {
-        return languageYaml;
-    }
-
-    public TelegramBot getTelegramBot() {
-        return telegramBot;
-    }
-
-    public void reloadLanguage() throws IOException {
-        YamlManager.getInstance().dumpYaml(languageYaml);
-    }
-
-    public void reloadConfigs() throws IOException {
-        YamlManager.getInstance().dumpYaml(configsYaml);
+    public static void loadConfigurations() throws IOException {
+        YamlManager.getInstance().loadYaml(LanguageYaml.class);
+        if (!LanguageYaml.getInlineKeyboards().isEmpty())
+            LanguageYaml.getInlineKeyboards().clear(); // pulendo la lista delle tastiere memorizzate
+        YamlManager.getInstance().loadYaml(ConfigsYaml.class);
+        YamlManager.getInstance().loadYaml(StaffChatYaml.class);
     }
 }

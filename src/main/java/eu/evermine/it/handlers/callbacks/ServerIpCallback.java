@@ -6,16 +6,13 @@ import eu.evermine.it.handlers.models.AbstractCallback;
 import eu.evermine.it.helpers.ActionsAPIHelper;
 
 public class ServerIpCallback extends AbstractCallback {
-    private final LanguageYaml language;
 
-
-    public ServerIpCallback(LanguageYaml language) {
-        this.language = language;
+    public ServerIpCallback() {
     }
 
     @Override
     public boolean handleUpdate(Update update) {
-        ActionsAPIHelper.answerCallbackQuery(update.callbackQuery().id(), language.getLanguageString("server-ip-callback-text"));
+        ActionsAPIHelper.answerCallbackQuery(update.callbackQuery().id(), LanguageYaml.getLanguageString("server-ip-callback-text"));
         return true;
     }
 

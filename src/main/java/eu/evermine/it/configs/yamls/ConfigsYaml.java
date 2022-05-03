@@ -20,7 +20,7 @@ import java.util.Objects;
  * </ul>
  *
  * @author just
- * @version 1.0
+ * @version 2.1
  * @see AbstractYaml
  */
 public class ConfigsYaml extends AbstractYaml {
@@ -29,24 +29,24 @@ public class ConfigsYaml extends AbstractYaml {
      * ID dell'eventuale gruppo di amministratori. Nel caso in cui il gruppo non sia stato
      * definito nel file di config, il suo valore sarà null oppure minore di zero.
      */
-    private Long admingroup;
+    private static Long admingroup;
     /**
      * Lista degli ID degli admin del bot. Gli admin sono utenti che possono eseguire
      * operazioni di amministrazione del bot, tra cui diversi comandi riservati a loro.
      * Nel caso in cui la lista dovesse essere vuota, il valore sarà null.
      */
-    private List<Long> admins;
+    private static List<Long> admins;
     /**
      * Il token identificativo del bot, necessario per la comunicazione con l'API di Telegram.
      * Se questo token non è definito nel file di config, può essere fornito durante l'avvio del bot
      * attraverso linea di comando. Vedi {@link eu.evermine.it.EvermineSupportBot#main(String[])}.
      * Se questo token non è definito in nessun caso, il bot non potrà funzionare.
      */
-    private String token;
+    private static String token;
     /**
      * L'username del bot, definito tramite t.me/BotFather su Telegram. Non contiene la "@".
      */
-    private String username;
+    private static String username;
 
 
     /**
@@ -60,22 +60,11 @@ public class ConfigsYaml extends AbstractYaml {
     }
 
     /**
-     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
-     * del file di configurazione Yaml sulle proprietà della classe.
-     * Imposta il valore di {@link #admingroup}.
-     *
-     * @param admingroup L'ID del gruppo di amministratori, se definito.
-     */
-    public void setAdmingroup(Long admingroup) {
-        this.admingroup = admingroup;
-    }
-
-    /**
      * Verifica che l'ID del gruppo di amministratori sia stato fornito.
      *
      * @return True se l'ID è stato fornito, false altrimenti.
      */
-    public boolean isAdminGroupSet() {
+    public static boolean isAdminGroupSet() {
         return getAdminGroupID() != null;
     }
 
@@ -85,8 +74,8 @@ public class ConfigsYaml extends AbstractYaml {
      *
      * @return L'ID del gruppo di amministratori, se definito, null altrimenti.
      */
-    public @Nullable Long getAdminGroupID() {
-        if (this.admingroup == -1)
+    public static @Nullable Long getAdminGroupID() {
+        if (ConfigsYaml.admingroup == -1)
             return null;
         return admingroup;
     }
@@ -98,7 +87,7 @@ public class ConfigsYaml extends AbstractYaml {
      * @param id L'ID dell'utente da controllare.
      * @return True se l'ID è presente nella lista degli amministratori, false altrimenti.
      */
-    public boolean isAdmin(Long id) {
+    public static boolean isAdmin(Long id) {
         return admins.contains(id);
     }
 
@@ -107,7 +96,7 @@ public class ConfigsYaml extends AbstractYaml {
      *
      * @return La lista degli ID degli amministratori del bot, se definita.
      */
-    public List<Long> getAdmins() {
+    public static List<Long> getAdmins() {
         return admins;
     }
 
@@ -119,7 +108,36 @@ public class ConfigsYaml extends AbstractYaml {
      * @param admins La lista degli ID degli amministratori del bot, se definita.
      */
     public void setAdmins(List<Long> admins) {
-        this.admins = admins;
+        ConfigsYaml.admins = admins;
+    }
+
+    /**
+     * Restituisce il token del bot.
+     *
+     * @return Il token del bot.
+     */
+    public static String getBotToken() {
+        return ConfigsYaml.token;
+    }
+
+    /**
+     * Restituisce l'username del bot.
+     *
+     * @return L'username del bot.
+     */
+    public static String getBotUsername() {
+        return ConfigsYaml.username;
+    }
+
+    /**
+     * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
+     * del file di configurazione Yaml sulle proprietà della classe.
+     * Imposta il valore di {@link #admingroup}.
+     *
+     * @param admingroup L'ID del gruppo di amministratori, se definito.
+     */
+    public void setAdmingroup(Long admingroup) {
+        ConfigsYaml.admingroup = admingroup;
     }
 
     /**
@@ -130,16 +148,7 @@ public class ConfigsYaml extends AbstractYaml {
      * @param token Il token del bot, se definito.
      */
     public void setToken(String token) {
-        this.token = token;
-    }
-
-    /**
-     * Restituisce il token del bot.
-     *
-     * @return Il token del bot.
-     */
-    public String getBotToken() {
-        return this.token;
+        ConfigsYaml.token = token;
     }
 
     /**
@@ -150,16 +159,7 @@ public class ConfigsYaml extends AbstractYaml {
      * @param username L'username del bot.
      */
     public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Restituisce l'username del bot.
-     *
-     * @return L'username del bot.
-     */
-    public String getBotUsername() {
-        return this.username;
+        ConfigsYaml.username = username;
     }
 
     /**
@@ -172,7 +172,7 @@ public class ConfigsYaml extends AbstractYaml {
     @Override
     public void checkConfigValidity() throws IllegalArgumentException {
         try {
-            List.of(this.token, this.username).forEach(Objects::requireNonNull);
+            List.of(ConfigsYaml.token, ConfigsYaml.username).forEach(Objects::requireNonNull);
         } catch (NullPointerException e) {
             throw new IllegalArgumentException();
         }
@@ -193,10 +193,10 @@ public class ConfigsYaml extends AbstractYaml {
     @Override
     public Object getDumpableData() {
         Map<String, Object> data = new HashMap<>();
-        data.put("admingroup", this.admingroup);
-        data.put("admins", this.admins);
-        data.put("token", this.token);
-        data.put("username", this.username);
+        data.put("admingroup", ConfigsYaml.admingroup);
+        data.put("admins", ConfigsYaml.admins);
+        data.put("token", ConfigsYaml.token);
+        data.put("username", ConfigsYaml.username);
         return data;
     }
 }

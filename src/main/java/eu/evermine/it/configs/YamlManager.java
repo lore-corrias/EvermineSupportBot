@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -21,7 +22,7 @@ import java.util.Objects;
  * I file di config predefiniti vengono ottenuti dalla cartella "resources" attraverso il metodo {@link #getResource}
  *
  * @author just
- * @version 2.0
+ * @version 2.1
  * @see AbstractYaml
  */
 public class YamlManager {
@@ -78,9 +79,10 @@ public class YamlManager {
     }
 
     /**
-     * Carica un file Yaml in un oggetto.
-     * L'oggetto fornito deve estendere la classe astratta {@link AbstractYaml}, in modo da
-     * identificare un oggetto che rappresenta un file Yaml.
+     * Carica un file Yaml utilizzando la classe fornita come modello.
+     * La classe fornita deve essere estensione della classe astratta {@link AbstractYaml},
+     * in modo da identificare una rappresentazione di un file Yaml.
+     * Un'istanza viene creata a partire dalla classe fornita.
      * Il nome del file viene fornito dal metodo {@link AbstractYaml#getFilename()}, e se il file
      * "configs/filename" non esiste, il metodo copia nella stessa path il file presente in "resources/filename".
      * Se il file non è presente nella cartella resources, viene lanciata un'eccezione.
@@ -88,37 +90,49 @@ public class YamlManager {
      * L'oggetto viene verificato dal metodo {@link #validateConfig}, e in caso di errore, viene lanciata un'eccezione.
      * Il metodo restituisce poi l'oggetto popolato con i dati del file Yaml.
      *
-     * @param abstractYaml Oggetto che rappresenta un file Yaml.
-     * @return L'oggetto popolato con i dati del file Yaml.
+     * @param clazz Classe che rappresenta il modello del config Yaml da caricare.
      * @throws IOException              Se il file Yaml non è presente nella cartella resources.
-     * @throws IllegalArgumentException Se il file Yaml non è valido.
+     * @throws IllegalArgumentException Se il file Yaml non è valido, o se la creazione dell'istanza di "clazz" fallisce.
      */
-    public AbstractYaml loadYaml(AbstractYaml abstractYaml) throws IOException, IllegalArgumentException {
-        this.validateConfig(abstractYaml.getFilename());
-        AbstractYaml loadedYaml = mapper.readValue(Files.newBufferedReader(Path.of("config/" + abstractYaml.getFilename())), abstractYaml.getClass());
+    public void loadYaml(Class<? extends AbstractYaml> clazz) throws IOException, IllegalArgumentException {
+        try {
+            String filename = clazz.getConstructor().newInstance().getFilename();
+            this.validateConfig(filename);
+            mapper.readValue(Files.newBufferedReader(Path.of("config/" + filename)), clazz).checkConfigValidity();
+        } catch (NoSuchMethodException ignored) { // Jackson impedisce l'utilizzo di una classe senza costruttore vuoto.
 
-        loadedYaml.checkConfigValidity();
-        return loadedYaml;
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**
-     * Carica i valori di un oggetto all'interno di un file Yaml.
-     * L'oggetto fornito deve estendere la classe astratta {@link AbstractYaml}, in modo da
-     * identificare un oggetto che rappresenta un file Yaml.
+     * Carica i valori di una classe all'interno di un file Yaml.
+     * La classe fornita deve essere estensione della classe astratta {@link AbstractYaml},
+     * in modo da identificare una rappresentazione di un file Yaml.
+     * Un istanza viene creata a partire dalla classe fornita.
      * Il nome del file viene fornito dal metodo {@link AbstractYaml#getFilename()}.
      * I dati da caricare all'interno del file Yaml vengono forniti dal metodo {@link AbstractYaml#getDumpableData}.
      * Se il metodo getDumpableData restituisce null, e quindi la classe non ha dati da salvare,
      * viene lanciata un'eccezione.
      * La stringa di valori del file Yaml viene scritta nel file "config/filename".
      *
-     * @param abstractYaml Oggetto che rappresenta un file Yaml.
+     * @param clazz Classe che rappresenta il modello del config Yaml da caricare.
      * @throws IOException              In caso di errore nella scrittura su file.
      * @throws IllegalArgumentException Se l'oggetto non presenta dati da scrivere.
      */
-    public void dumpYaml(AbstractYaml abstractYaml) throws IOException, IllegalArgumentException {
-        if (abstractYaml.getDumpableData() == null)
-            throw new IllegalArgumentException("Dumpable data non definito");
-        mapper.writeValue(new File("config/" + abstractYaml.getFilename()), abstractYaml.getDumpableData());
+    public void dumpYaml(Class<? extends AbstractYaml> clazz) throws IOException, IllegalArgumentException {
+        try {
+            AbstractYaml abstractYaml = clazz.getConstructor().newInstance();
+            if (abstractYaml.getDumpableData() == null)
+                throw new IllegalArgumentException("Dumpable data non definito");
+            mapper.writerWithDefaultPrettyPrinter().writeValue(new File("config/" + abstractYaml.getFilename()), abstractYaml.getDumpableData());
+        } catch (
+                InvocationTargetException ignored) { // Jackson impedisce l'utilizzo di una classe senza costruttore vuoto.
+
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

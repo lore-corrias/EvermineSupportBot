@@ -8,15 +8,12 @@ import eu.evermine.it.updatesdispatcher.handlers.GenericUpdateHandler;
 
 public class GroupJoinHandler extends GenericUpdateHandler {
 
-    private final ConfigsYaml configs;
-
-    public GroupJoinHandler(ConfigsYaml configs) {
-        this.configs = configs;
+    public GroupJoinHandler() {
     }
 
     @Override
     public boolean handleUpdate(Update update) {
-        if (update.message().chat().id().equals(configs.getAdminGroupID()))
+        if (update.message().chat().id().equals(ConfigsYaml.getAdminGroupID()))
             return true;
 
         ActionsAPIHelper.leaveChat(update.message().chat().id());

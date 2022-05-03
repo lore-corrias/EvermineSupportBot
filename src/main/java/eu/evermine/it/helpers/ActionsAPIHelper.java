@@ -59,13 +59,13 @@ public class ActionsAPIHelper {
         return getTelegramBotInstance().execute(new ForwardMessage(toChatId, fromChatId, messageId));
     }
 
+    private static TelegramBot getTelegramBotInstance() {
+        return telegramBot;
+    }
+
     public static void setTelegramBotInstance(TelegramBot telegramBotInstance) throws IllegalAccessException {
         if (telegramBot != null)
             throw new IllegalAccessException();
         telegramBot = telegramBotInstance;
-    }
-
-    private static TelegramBot getTelegramBotInstance() {
-        return telegramBot;
     }
 }

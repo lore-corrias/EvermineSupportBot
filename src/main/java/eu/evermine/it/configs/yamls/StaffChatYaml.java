@@ -17,7 +17,7 @@ import java.util.Map;
  * dalla StaffChat.
  *
  * @author just
- * @version 2.0
+ * @version 2.1
  * @see AbstractYaml
  */
 public class StaffChatYaml extends AbstractYaml {
@@ -25,13 +25,11 @@ public class StaffChatYaml extends AbstractYaml {
     /**
      * Lista degli ID degli utenti attualmente impegnati nella StaffChat.
      */
-    @JsonProperty("in-chat-users")
-    private List<Long> inChatUsers;
+    private static List<Long> inChatUsers;
     /**
      * Lista degli ID degli utenti banditi dalla StaffChat.
      */
-    @JsonProperty("banned-users")
-    private List<Long> bannedUsers;
+    private static List<Long> bannedUsers;
 
 
     /**
@@ -45,23 +43,35 @@ public class StaffChatYaml extends AbstractYaml {
     }
 
     /**
+     * Restituisce la Lista degli ID degli utenti banditi dalla StaffChat. Vedi {@link #bannedUsers}.
+     *
+     * @return La lista degli ID degli utenti banditi dalla StaffChat.
+     */
+    @JsonProperty("banned-users")
+    public static List<Long> getBannedUsers() {
+        return bannedUsers;
+    }
+
+    /**
      * Setter utilizzato dalla classe {@link com.fasterxml.jackson.databind.ObjectMapper} per caricare i valori
      * del file di configurazione Yaml sulle proprietà della classe.
      * Imposta il valore di {@link #bannedUsers}.
      *
      * @param bannedUsers La lista che contiene gli ID degli utenti banditi.
      */
+    @JsonProperty("banned-users")
     public void setBannedUsers(List<Long> bannedUsers) {
-        this.bannedUsers = bannedUsers;
+        StaffChatYaml.bannedUsers = bannedUsers;
     }
 
     /**
-     * Restituisce la Lista degli ID degli utenti banditi dalla StaffChat. Vedi {@link #bannedUsers}.
+     * Restituisce la Lista degli ID degli utenti impegnati nella StaffChat. Vedi {@link #inChatUsers}.
      *
-     * @return La lista degli ID degli utenti banditi dalla StaffChat.
+     * @return La lista degli ID degli utenti impegnati nella StaffChat.
      */
-    public List<Long> getBannedUsers() {
-        return bannedUsers;
+    @JsonProperty("in-chat-users")
+    public static List<Long> getInChatUsers() {
+        return inChatUsers;
     }
 
     /**
@@ -71,17 +81,9 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param inChatUsers La lista che contiene gli ID degli utenti impegnati nella StaffChat.
      */
+    @JsonProperty("in-chat-users")
     public void setInChatUsers(List<Long> inChatUsers) {
-        this.inChatUsers = inChatUsers;
-    }
-
-    /**
-     * Restituisce la Lista degli ID degli utenti impegnati nella StaffChat. Vedi {@link #inChatUsers}.
-     *
-     * @return La lista degli ID degli utenti impegnati nella StaffChat.
-     */
-    public List<Long> getInChatUsers() {
-        return inChatUsers;
+        StaffChatYaml.inChatUsers = inChatUsers;
     }
 
     /**
@@ -91,11 +93,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da aggiungere alla lista.
      */
-    public void addBannedUser(Long userId) throws IOException {
+    public static void addBannedUser(Long userId) throws IOException {
         if (bannedUsers.contains(userId))
             return;
         bannedUsers.add(userId);
-        YamlManager.getInstance().dumpYaml(this);
+        YamlManager.getInstance().dumpYaml(StaffChatYaml.class);
     }
 
     /**
@@ -104,7 +106,7 @@ public class StaffChatYaml extends AbstractYaml {
      * @param userId L'ID dell'utente da verificare.
      * @return True se l'utente è bandito, false altrimenti.
      */
-    public boolean isBannedUser(Long userId) {
+    public static boolean isBannedUser(Long userId) {
         return bannedUsers.contains(userId);
     }
 
@@ -115,11 +117,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da rimuovere dalla lista.
      */
-    public void removeBannedUser(Long userId) throws IOException {
+    public static void removeBannedUser(Long userId) throws IOException {
         if (!bannedUsers.contains(userId))
             return;
         bannedUsers.remove(userId);
-        YamlManager.getInstance().dumpYaml(this);
+        YamlManager.getInstance().dumpYaml(StaffChatYaml.class);
     }
 
     /**
@@ -129,11 +131,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da aggiungere alla lista.
      */
-    public void addInChatUser(Long userId) throws IOException {
+    public static void addInChatUser(Long userId) throws IOException {
         if (inChatUsers.contains(userId))
             return;
         inChatUsers.add(userId);
-        YamlManager.getInstance().dumpYaml(this);
+        YamlManager.getInstance().dumpYaml(StaffChatYaml.class);
     }
 
     /**
@@ -142,7 +144,7 @@ public class StaffChatYaml extends AbstractYaml {
      * @param userId L'ID dell'utente da verificare.
      * @return True se l'utente è impegnato nella StaffChat, false altrimenti.
      */
-    public boolean isInChatUser(Long userId) {
+    public static boolean isInChatUser(Long userId) {
         return inChatUsers.contains(userId);
     }
 
@@ -153,11 +155,11 @@ public class StaffChatYaml extends AbstractYaml {
      *
      * @param userId L'ID dell'utente da rimuovere dalla lista.
      */
-    public void removeInChatUser(Long userId) throws IOException {
+    public static void removeInChatUser(Long userId) throws IOException {
         if (!inChatUsers.contains(userId))
             return;
         inChatUsers.remove(userId);
-        YamlManager.getInstance().dumpYaml(this);
+        YamlManager.getInstance().dumpYaml(StaffChatYaml.class);
     }
 
     /**

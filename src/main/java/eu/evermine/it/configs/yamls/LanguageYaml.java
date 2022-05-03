@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.YamlManager;
 import eu.evermine.it.helpers.InlineKeyboardButtonBuilder;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +25,7 @@ import java.util.Set;
  * Il primo contiene i messaggi di testo utilizzati dal bot, mentre il secondo i valori delle varie linee delle tastiere inline.
  *
  * @author just
- * @version 2.0
+ * @version 2.1
  * @see AbstractYaml
  */
 public class LanguageYaml extends AbstractYaml {
@@ -33,19 +34,19 @@ public class LanguageYaml extends AbstractYaml {
      * Mappa che contiene le {@link InlineKeyboardMarkup} generate dal metodo {@link #getKeyboard}, a partire
      * dal valore di {@link #keyboards}.
      */
-    private final Map<String, InlineKeyboardMarkup> inlineKeyboards = new HashMap<>();
+    private static final Map<String, InlineKeyboardMarkup> inlineKeyboards = new HashMap<>();
     /**
      * Mappa che rappresenta tutti i dati relativi ai messaggi utilizzati dal bot nel file Yaml.
      * La chiave è l'indice del messaggio, mentre il valore è il messaggio stesso.
      */
-    private Map<String, String> language;
+    private static Map<String, String> language;
     /**
      * Mappa che rappresenta tutti i dati relativi alle linee delle tastiere inline utilizzate dal bot nel file Yaml.
      * La chiave è l'indice della tastiera, mentre il valore è una lista che contiene tutte le righe della tastiera,
      * ognuna delle quali contiene una lista di bottoni. Un bottone è una mappa, che contiene il testo del bottone (indice "text")
      * e il comando associato (indice "callback_data") o eventualmente l'URL (indice "url").
      */
-    private Map<String, List<List<Map<String, String>>>> keyboards;
+    private static Map<String, List<List<Map<String, String>>>> keyboards;
 
     /**
      * Costruttore della classe. Fornisce alla classe super il nome del file di config,
@@ -58,12 +59,21 @@ public class LanguageYaml extends AbstractYaml {
     }
 
     /**
+     * Getter per le tastiere inline che sono state memorizzate.
+     *
+     * @return La mappa contenente le tastiere inline.
+     */
+    public static Map<String, InlineKeyboardMarkup> getInlineKeyboards() {
+        return inlineKeyboards;
+    }
+
+    /**
      * Restituisce la mappa contenente i messaggi. Vedi {@link #language}.
      *
      * @return La mappa contenente i messaggi.
      */
-    public Map<String, String> getLanguage() {
-        return this.language;
+    public static Map<String, String> getLanguage() {
+        return language;
     }
 
     /**
@@ -74,7 +84,7 @@ public class LanguageYaml extends AbstractYaml {
      * @param language La mappa che contiene i messaggi.
      */
     public void setLanguage(Map<String, String> language) {
-        this.language = language;
+        LanguageYaml.language = language;
     }
 
     /**
@@ -82,8 +92,8 @@ public class LanguageYaml extends AbstractYaml {
      *
      * @return La mappa contenente le varie tastiere inline.
      */
-    public Map<String, List<List<Map<String, String>>>> getKeyboards() {
-        return this.keyboards;
+    public static Map<String, List<List<Map<String, String>>>> getKeyboards() {
+        return keyboards;
     }
 
     /**
@@ -94,7 +104,7 @@ public class LanguageYaml extends AbstractYaml {
      * @param keyboard La mappa che rappresenta le varie tastiere inline..
      */
     public void setKeyboards(Map<String, List<List<Map<String, String>>>> keyboard) {
-        this.keyboards = keyboard;
+        LanguageYaml.keyboards = keyboard;
     }
 
 
@@ -113,26 +123,26 @@ public class LanguageYaml extends AbstractYaml {
      * @return La tastiera inline.
      * @throws IllegalArgumentException Se le liste {@code textArguments} e {@code buttonArguments} non sono delle stesse dimensioni.
      */
-    public @Nullable InlineKeyboardMarkup getKeyboard(String index, @Nullable List<String> textArguments, @Nullable List<String> buttonArguments) {
-        if (!this.keyboards.containsKey(index))
+    public static @Nullable InlineKeyboardMarkup getKeyboard(String index, @Nullable List<String> textArguments, @Nullable List<String> buttonArguments) {
+        if (!LanguageYaml.keyboards.containsKey(index))
             throw new IllegalArgumentException("Il file di lingua non contiene la chiave per la tastiera " + index);
         if (textArguments == null && buttonArguments == null) {
-            if (this.inlineKeyboards.containsKey(index))
-                return this.inlineKeyboards.get(index);
+            if (LanguageYaml.inlineKeyboards.containsKey(index))
+                return LanguageYaml.inlineKeyboards.get(index);
         }
-        InlineKeyboardButton[][] rows = new InlineKeyboardButton[this.keyboards.get(index).size()][];
-        for (int i = 0; i < this.keyboards.get(index).size(); i++) {
-            List<Map<String, String>> row = this.keyboards.get(index).get(i);
+        InlineKeyboardButton[][] rows = new InlineKeyboardButton[LanguageYaml.keyboards.get(index).size()][];
+        for (int i = 0; i < LanguageYaml.keyboards.get(index).size(); i++) {
+            List<Map<String, String>> row = LanguageYaml.keyboards.get(index).get(i);
             for (int j = 0; j < row.size(); j++) {
                 Map<String, String> button = row.get(j);
                 if (!button.containsKey("text") || (!button.containsKey("callback_data") && !button.containsKey("url")))
                     throw new IllegalArgumentException("Il file di lingua deve contenere la chiave \"text\" e uno tra \"callback_data\" e \"url\" per ogni riga della tastiera");
                 InlineKeyboardButtonBuilder inlineKeyboardButton = InlineKeyboardButtonBuilder.getBuilder();
-                inlineKeyboardButton.setText(this.replaceArgs(button.get("text"), textArguments));
+                inlineKeyboardButton.setText(LanguageYaml.replaceArgs(button.get("text"), textArguments));
                 if (button.containsKey("callback_data")) {
-                    inlineKeyboardButton.setCallbackData(this.replaceArgs(button.get("callback_data"), buttonArguments));
+                    inlineKeyboardButton.setCallbackData(LanguageYaml.replaceArgs(button.get("callback_data"), buttonArguments));
                 } else if (button.containsKey("url")) {
-                    inlineKeyboardButton.setUrl(this.replaceArgs(button.get("url"), buttonArguments));
+                    inlineKeyboardButton.setUrl(LanguageYaml.replaceArgs(button.get("url"), buttonArguments));
                 }
                 if (rows[i] == null)
                     rows[i] = new InlineKeyboardButton[row.size()];
@@ -141,16 +151,16 @@ public class LanguageYaml extends AbstractYaml {
         }
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(rows);
         if (textArguments != null && buttonArguments != null)
-            this.inlineKeyboards.put(index, keyboardMarkup);
+            LanguageYaml.inlineKeyboards.put(index, keyboardMarkup);
         return keyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getKeyboard(String index) {
-        return this.getKeyboard(index, null, null);
+    public static InlineKeyboardMarkup getKeyboard(String index) {
+        return LanguageYaml.getKeyboard(index, null, null);
     }
 
-    public InlineKeyboardMarkup getKeyboard(String index, List<String> textArguments) {
-        return this.getKeyboard(index, textArguments, null);
+    public static InlineKeyboardMarkup getKeyboard(String index, List<String> textArguments) {
+        return LanguageYaml.getKeyboard(index, textArguments, null);
     }
 
 
@@ -163,15 +173,17 @@ public class LanguageYaml extends AbstractYaml {
      * @param args  La lista di parametri da sostituire nel messaggio, null se non ci sono parametri.
      * @return Il messaggio.
      */
-    public String getLanguageString(String index, @Nullable List<String> args) {
-        String s = this.language.get(index);
+    public static String getLanguageString(String index, @Nullable List<String> args) {
+        String s = LanguageYaml.getLanguage().get(index);
+        if (s == null)
+            EvermineSupportBot.logger.error("Il messaggio " + index + " non è presente nel file di lingua.");
         if (args != null) {
-            s = this.replaceArgs(s, args);
+            s = LanguageYaml.replaceArgs(s, args);
         }
         return s;
     }
 
-    public String getLanguageString(String index) {
+    public static String getLanguageString(String index) {
         return getLanguageString(index, null);
     }
 
@@ -183,7 +195,7 @@ public class LanguageYaml extends AbstractYaml {
      * @param args La lista di parametri da sostituire.
      * @return La stringa modificata.
      */
-    private String replaceArgs(String s, @Nullable List<String> args) {
+    private static String replaceArgs(String s, @Nullable List<String> args) {
         if (args == null)
             return s;
         for (String arg : args) {
@@ -207,12 +219,19 @@ public class LanguageYaml extends AbstractYaml {
     public void checkConfigValidity() throws IllegalArgumentException, IOException {
         try (InputStream defaultConfig = YamlManager.getResource("language.yml")) {
             final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-            LanguageYaml defaultConfigMap = mapper.readValue(defaultConfig, LanguageYaml.class);
+            HashMap<?, ?> defaultConfigMap = mapper.readValue(defaultConfig, HashMap.class);
 
-            if (defaultConfigMap.getLanguage().keySet().size() > this.getLanguage().keySet().size()) {
-                Set<String> diff = defaultConfigMap.getLanguage().keySet();
-                diff.removeAll(this.getLanguage().keySet());
-                throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi: " + diff);
+            Set<String> keysLang = ((HashMap<String, ?>) defaultConfigMap.get("language")).keySet();
+            Set<String> keysKeyboard = ((HashMap<String, ?>) defaultConfigMap.get("keyboards")).keySet();
+            if (keysLang.size() < LanguageYaml.getLanguage().keySet().size()) {
+                Set<String> diff = LanguageYaml.getLanguage().keySet();
+                diff.removeAll(keysLang);
+                throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi per i messaggi: " + diff);
+            }
+            if (keysKeyboard.size() < LanguageYaml.getKeyboards().keySet().size()) {
+                Set<String> diff = LanguageYaml.getKeyboards().keySet();
+                diff.removeAll(keysKeyboard);
+                throw new IllegalArgumentException("Il file di lingua non è completo, mancano delle chiavi per le tastiere: " + diff);
             }
         }
     }
@@ -227,8 +246,8 @@ public class LanguageYaml extends AbstractYaml {
     @Override
     public Object getDumpableData() {
         Map<String, Map<?, ?>> dump = new HashMap<>();
-        dump.put("language", this.language);
-        dump.put("keyboards", this.keyboards);
+        dump.put("language", LanguageYaml.language);
+        dump.put("keyboards", LanguageYaml.keyboards);
         return dump;
     }
 }
