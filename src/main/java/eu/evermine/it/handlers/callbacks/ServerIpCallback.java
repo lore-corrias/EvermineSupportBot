@@ -3,7 +3,7 @@ package eu.evermine.it.handlers.callbacks;
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.handlers.models.AbstractCallback;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 public class ServerIpCallback extends AbstractCallback {
 
@@ -11,9 +11,8 @@ public class ServerIpCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         ActionsAPIHelper.answerCallbackQuery(update.callbackQuery().id(), LanguageYaml.getLanguageString("server-ip-callback-text"));
-        return true;
     }
 
     @Override

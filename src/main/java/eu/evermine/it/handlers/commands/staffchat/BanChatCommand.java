@@ -7,7 +7,7 @@ import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
 import eu.evermine.it.handlers.models.AbstractCommand;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,12 +24,12 @@ public class BanChatCommand extends AbstractCommand {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         if (!ConfigsYaml.isAdmin(getCommandUserId(update)))
-            return true;
+            return;
         if (getCommandArguments(update).length != 1) {
             ActionsAPIHelper.sendMessage(LanguageYaml.getLanguageString("ban-chat-syntax", List.of(getCommandUsage())), getCommandChatId(update), getCommandMessageId(update));
-            return true;
+            return;
         }
         try {
             Long userId = Long.parseLong(getCommandArguments(update)[0]);
@@ -50,6 +50,5 @@ public class BanChatCommand extends AbstractCommand {
             ActionsAPIHelper.sendMessage(LanguageYaml.getLanguageString("error-add-banned-users"), getCommandChatId(update), getCommandMessageId(update));
             EvermineSupportBot.logger.error(LanguageYaml.getLanguageString("error-add-banned-users"), e);
         }
-        return true;
     }
 }

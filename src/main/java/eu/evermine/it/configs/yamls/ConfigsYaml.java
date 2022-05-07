@@ -1,5 +1,6 @@
 package eu.evermine.it.configs.yamls;
 
+import io.github.justlel.configs.yamls.YamlInterface;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.Objects;
 
 /**
  * Rappresentazione del file Yaml "configs.yml". Contiene le configurazioni per il plugin.
- * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
+ * Essendo la rappresentazione di un file Yaml, la classe implementa l'interfaccia {@link YamlInterface},
  * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene le seguenti informazioni:
  * <ul>
@@ -21,9 +22,8 @@ import java.util.Objects;
  *
  * @author just
  * @version 2.1
- * @see AbstractYaml
  */
-public class ConfigsYaml extends AbstractYaml {
+public class ConfigsYaml implements YamlInterface {
 
     /**
      * ID dell'eventuale gruppo di amministratori. Nel caso in cui il gruppo non sia stato
@@ -50,13 +50,9 @@ public class ConfigsYaml extends AbstractYaml {
 
 
     /**
-     * Costruttore della classe. Fornisce alla classe super il nome del file di config,
-     * in questo caso: "configs.yml".
-     *
-     * @see AbstractYaml#getFilename()
+     * Costruttore della classe.
      */
     public ConfigsYaml() {
-        super("configs.yml");
     }
 
     /**
@@ -160,6 +156,16 @@ public class ConfigsYaml extends AbstractYaml {
      */
     public void setUsername(String username) {
         ConfigsYaml.username = username;
+    }
+
+    /**
+     * Restituisce il nome del file di config, in questo caso "config.yaml".
+     *
+     * @return Il nome del file di config.
+     */
+    @Override
+    public String getFilename() {
+        return "configs.yml";
     }
 
     /**

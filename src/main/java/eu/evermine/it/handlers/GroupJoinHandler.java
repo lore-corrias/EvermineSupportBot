@@ -2,8 +2,8 @@ package eu.evermine.it.handlers;
 
 import com.pengrad.telegrambot.model.Update;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
-import eu.evermine.it.helpers.ActionsAPIHelper;
-import eu.evermine.it.updatesdispatcher.handlers.GenericUpdateHandler;
+import io.github.justlel.api.ActionsAPIHelper;
+import io.github.justlel.models.GenericUpdateHandler;
 
 
 public class GroupJoinHandler extends GenericUpdateHandler {
@@ -12,11 +12,10 @@ public class GroupJoinHandler extends GenericUpdateHandler {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         if (update.message().chat().id().equals(ConfigsYaml.getAdminGroupID()))
-            return true;
+            return;
 
         ActionsAPIHelper.leaveChat(update.message().chat().id());
-        return true;
     }
 }

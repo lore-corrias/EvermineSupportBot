@@ -1,7 +1,8 @@
 package eu.evermine.it.configs.yamls;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import eu.evermine.it.configs.YamlManager;
+import io.github.justlel.configs.YamlManager;
+import io.github.justlel.configs.yamls.YamlInterface;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 /**
  * Rappresentazione del file Yaml "staff-chat.yml". Contiene le configurazioni per la StaffChat.
- * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
+ * Essendo la rappresentazione di un file Yaml, la classe implementa l'interfaccia {@link YamlInterface},
  * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene solo due valori: "in-chat-users", che rappresenta una lista di utenti
  * attualmente impegnati nella StaffChat, e "banned-users", che rappresenta una lista di utenti banditi
@@ -18,9 +19,8 @@ import java.util.Map;
  *
  * @author just
  * @version 2.1
- * @see AbstractYaml
  */
-public class StaffChatYaml extends AbstractYaml {
+public class StaffChatYaml implements YamlInterface {
 
     /**
      * Lista degli ID degli utenti attualmente impegnati nella StaffChat.
@@ -33,13 +33,9 @@ public class StaffChatYaml extends AbstractYaml {
 
 
     /**
-     * Costruttore della classe. Fornisce alla classe super il nome del file di config,
-     * in questo caso: "staff-chat.yml".
-     *
-     * @see AbstractYaml#getFilename()
+     * Costruttore della classe.
      */
     public StaffChatYaml() {
-        super("staff-chat.yml");
     }
 
     /**
@@ -160,6 +156,17 @@ public class StaffChatYaml extends AbstractYaml {
             return;
         inChatUsers.remove(userId);
         YamlManager.getInstance().dumpYaml(StaffChatYaml.class);
+    }
+
+    /**
+     * Fornisce alla classe super il nome del file di config,
+     * in questo caso: "staff-chat.yml".
+     *
+     * @return Il nome del file di config.
+     */
+    @Override
+    public String getFilename() {
+        return "staff-chat.yml";
     }
 
     /**

@@ -1,12 +1,9 @@
 package eu.evermine.it.handlers.models;
 
 import com.pengrad.telegrambot.model.Update;
-import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
+import io.github.justlel.models.HandlerInterface;
 
 public abstract class AbstractCallback implements HandlerInterface {
-
-
-    public abstract boolean handleUpdate(Update update);
 
     public Long getCallbackUserID(Update update) {
         return update.callbackQuery().from().id();

@@ -7,8 +7,8 @@ import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
-import eu.evermine.it.helpers.ActionsAPIHelper;
-import eu.evermine.it.updatesdispatcher.handlers.GenericUpdateHandler;
+import io.github.justlel.api.ActionsAPIHelper;
+import io.github.justlel.models.GenericUpdateHandler;
 
 import java.util.List;
 
@@ -19,11 +19,11 @@ public class MessagesHandler extends GenericUpdateHandler {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         if (!update.message().chat().type().equals(Chat.Type.Private) && !update.message().chat().id().equals(ConfigsYaml.getAdminGroupID()))
-            return true;
+            return;
         if (ConfigsYaml.getAdmins().isEmpty())
-            return true;
+            return;
 
         if (ConfigsYaml.isAdmin(update.message().from().id()) && !StaffChatYaml.isInChatUser(update.message().from().id())) {
             if (update.message().replyToMessage() != null && update.message().replyToMessage().from().username().equals(ConfigsYaml.getBotUsername())) {
@@ -58,6 +58,5 @@ public class MessagesHandler extends GenericUpdateHandler {
                 }
             }
         }
-        return true;
     }
 }

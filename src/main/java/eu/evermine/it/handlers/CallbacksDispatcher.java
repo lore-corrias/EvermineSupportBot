@@ -7,8 +7,8 @@ import eu.evermine.it.handlers.callbacks.ServerIpCallback;
 import eu.evermine.it.handlers.callbacks.StartCallback;
 import eu.evermine.it.handlers.callbacks.StatusCallback;
 import eu.evermine.it.handlers.models.AbstractCallback;
-import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
-import eu.evermine.it.updatesdispatcher.handlers.SpecificUpdateHandler;
+import io.github.justlel.models.HandlerInterface;
+import io.github.justlel.models.SpecificUpdateHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
@@ -20,7 +20,6 @@ public class CallbacksDispatcher extends SpecificUpdateHandler<String> {
 
 
     public CallbacksDispatcher() {
-
         this.registerCallbackHandler("status", new StatusCallback());
         this.registerCallbackHandler("chat-start", new ChatStartCallback());
         this.registerCallbackHandler("start", new StartCallback());
@@ -45,7 +44,8 @@ public class CallbacksDispatcher extends SpecificUpdateHandler<String> {
         return this.callbackHandlers.get(callback);
     }
 
-    public @Nullable HandlerInterface dispatchUpdate(Update update) {
+    @Override
+    public @Nullable HandlerInterface returnUpdateHandler(Update update) {
         if (update.callbackQuery() == null)
             return null;
         String callback = update.callbackQuery().data();

@@ -1,7 +1,6 @@
 package eu.evermine.it;
 
 import com.pengrad.telegrambot.TelegramBot;
-import eu.evermine.it.configs.YamlManager;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
@@ -9,7 +8,8 @@ import eu.evermine.it.handlers.CallbacksDispatcher;
 import eu.evermine.it.handlers.CommandDispatcher;
 import eu.evermine.it.handlers.GroupJoinHandler;
 import eu.evermine.it.handlers.MessagesHandler;
-import eu.evermine.it.updatesdispatcher.UpdatesDispatcher;
+import io.github.justlel.configs.YamlManager;
+import io.github.justlel.models.UpdatesDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,10 +39,10 @@ public class EvermineSupportBot {
             EvermineSupportBot.logger.debug("API configurate.");
 
             UpdatesDispatcher updatesDispatcher = new UpdatesDispatcher();
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.COMMAND, new CommandDispatcher());
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.GenericUpdateTypes.CALLBACK_QUERY, new CallbacksDispatcher());
-            updatesDispatcher.registerUpdateHandler(List.of(UpdatesDispatcher.MessageUpdateTypes.GROUP_CHAT_CREATED, UpdatesDispatcher.MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler());
-            updatesDispatcher.registerUpdateHandler(UpdatesDispatcher.MessageUpdateTypes.getMediaUpdates(), new MessagesHandler());
+            updatesDispatcher.registerUpdatesHandler(UpdatesDispatcher.MessageUpdateTypes.COMMAND, new CommandDispatcher());
+            updatesDispatcher.registerUpdatesHandler(UpdatesDispatcher.GenericUpdateTypes.CALLBACK_QUERY, new CallbacksDispatcher());
+            updatesDispatcher.registerUpdatesHandler(List.of(UpdatesDispatcher.MessageUpdateTypes.GROUP_CHAT_CREATED, UpdatesDispatcher.MessageUpdateTypes.SUPERGROUP_CHAT_CREATED), new GroupJoinHandler());
+            updatesDispatcher.registerUpdatesHandler(UpdatesDispatcher.MessageUpdateTypes.getMediaUpdates(), new MessagesHandler());
 
             updatesDispatcher.runUpdateListener(new TelegramBot(ConfigsYaml.getBotToken()));
             EvermineSupportBot.logger.debug("Bot avviato.");

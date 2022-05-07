@@ -6,7 +6,7 @@ import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
 import eu.evermine.it.handlers.models.AbstractCallback;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ public class ChatStartCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         StringBuilder text = new StringBuilder();
         InlineKeyboardMarkup keyboardMarkup = null;
         if (StaffChatYaml.isInChatUser(getCallbackUserID(update))) {
@@ -32,14 +32,13 @@ public class ChatStartCallback extends AbstractCallback {
         }
         ActionsAPIHelper.editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
         if (StaffChatYaml.isBannedUser(getCallbackUserID(update)))
-            return true;
+            return;
         try {
             if (!StaffChatYaml.isInChatUser(getCallbackUserID(update)))
                 StaffChatYaml.addInChatUser(getCallbackUserID(update));
         } catch (IOException e) {
             EvermineSupportBot.logger.error(LanguageYaml.getLanguageString("error-adding-user-missing-config-file"));
         }
-        return true;
     }
 
     @Override

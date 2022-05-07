@@ -6,8 +6,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.EvermineSupportBot;
-import eu.evermine.it.configs.YamlManager;
 import eu.evermine.it.helpers.InlineKeyboardButtonBuilder;
+import io.github.justlel.configs.YamlManager;
+import io.github.justlel.configs.yamls.YamlInterface;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -19,16 +20,15 @@ import java.util.Set;
 
 /**
  * Rappresentazione del file Yaml "language.yml". Contiene i messaggi utilizzati dal bot.
- * Essendo la rappresentazione di un file Yaml, la classe estende la classe {@link AbstractYaml},
+ * Essendo la rappresentazione di un file Yaml, la classe implementa l'interfaccia {@link YamlInterface},
  * implementandone i metodi astratti {@link #checkConfigValidity()} e {@link #getDumpableData()}.
  * Il file di config contiene due indici: "language" e "keyboard". La struttura del file è definita nei commenti di "resources/language.yml".
  * Il primo contiene i messaggi di testo utilizzati dal bot, mentre il secondo i valori delle varie linee delle tastiere inline.
  *
  * @author just
  * @version 2.1
- * @see AbstractYaml
  */
-public class LanguageYaml extends AbstractYaml {
+public class LanguageYaml implements YamlInterface {
 
     /**
      * Mappa che contiene le {@link InlineKeyboardMarkup} generate dal metodo {@link #getKeyboard}, a partire
@@ -49,13 +49,9 @@ public class LanguageYaml extends AbstractYaml {
     private static Map<String, List<List<Map<String, String>>>> keyboards;
 
     /**
-     * Costruttore della classe. Fornisce alla classe super il nome del file di config,
-     * in questo caso: "language.yml".
-     *
-     * @see AbstractYaml#getFilename()
+     * Costruttore della classe.
      */
     public LanguageYaml() {
-        super("language.yml");
     }
 
     /**
@@ -202,6 +198,16 @@ public class LanguageYaml extends AbstractYaml {
             s = s.replaceFirst("%s", arg);
         }
         return s;
+    }
+
+    /**
+     * Fornisce alla classe super il nome del file di config, in questo caso: "language.yml".
+     *
+     * @return Il nome del file di config.
+     */
+    @Override
+    public String getFilename() {
+        return "language.yml";
     }
 
     /**

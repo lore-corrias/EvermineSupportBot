@@ -7,7 +7,7 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.handlers.models.AbstractCallback;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -23,7 +23,7 @@ public class StatusCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         boolean status = false;
         int players = 0;
 
@@ -52,7 +52,6 @@ public class StatusCallback extends AbstractCallback {
         }
 
         ActionsAPIHelper.editMessage(messageText, getCallbackChatID(update), getCallbackMessageID(update), keyboardMarkup);
-        return true;
     }
 
     @Override

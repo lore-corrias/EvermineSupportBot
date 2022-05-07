@@ -6,7 +6,7 @@ import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
 import eu.evermine.it.handlers.models.AbstractCallback;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 import java.io.IOException;
 import java.util.List;
@@ -18,7 +18,7 @@ public class StartCallback extends AbstractCallback {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         try {
             StaffChatYaml.removeInChatUser(getCallbackUserID(update));
         } catch (IOException e) {
@@ -35,7 +35,6 @@ public class StartCallback extends AbstractCallback {
         }
 
         ActionsAPIHelper.editMessage(text.toString(), getCallbackChatID(update), getCallbackMessageID(update), inlineKeyboardMarkup);
-        return true;
     }
 
     @Override

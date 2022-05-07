@@ -5,7 +5,7 @@ import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.ConfigsYaml;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.handlers.models.AbstractCommand;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 import java.io.IOException;
 
@@ -21,9 +21,9 @@ public class ReloadCommand extends AbstractCommand {
     }
 
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         if (!ConfigsYaml.isAdmin(getCommandUserId(update)))
-            return true;
+            return;
 
         try {
             EvermineSupportBot.loadConfigurations();
@@ -31,6 +31,5 @@ public class ReloadCommand extends AbstractCommand {
         } catch (IOException e) {
             EvermineSupportBot.logger.error(LanguageYaml.getLanguageString("error-reload-configs"), e);
         }
-        return true;
     }
 }

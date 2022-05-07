@@ -6,29 +6,26 @@ import eu.evermine.it.handlers.commands.StartCommand;
 import eu.evermine.it.handlers.commands.staffchat.BanChatCommand;
 import eu.evermine.it.handlers.commands.staffchat.EndChatCommand;
 import eu.evermine.it.handlers.commands.staffchat.PardonChatCommand;
-import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
-import eu.evermine.it.updatesdispatcher.handlers.SpecificUpdateHandler;
+import io.github.justlel.models.HandlerInterface;
+import io.github.justlel.models.SpecificUpdateHandler;
 import org.jetbrains.annotations.Nullable;
 
 
 public class CommandDispatcher extends SpecificUpdateHandler<String> {
 
     public CommandDispatcher() {
-        super.setSpecificHandler("start", new StartCommand());
-        super.setSpecificHandler("reload", new ReloadCommand());
-        super.setSpecificHandler("banchat", new BanChatCommand());
-        super.setSpecificHandler("pardonchat", new PardonChatCommand());
-        super.setSpecificHandler("endchat", new EndChatCommand());
+        super.registerSpecificHandler("start", new StartCommand());
+        super.registerSpecificHandler("reload", new ReloadCommand());
+        super.registerSpecificHandler("banchat", new BanChatCommand());
+        super.registerSpecificHandler("pardonchat", new PardonChatCommand());
+        super.registerSpecificHandler("endchat", new EndChatCommand());
     }
 
+    @Nullable
     @Override
-    public @Nullable HandlerInterface dispatchUpdate(Update update) {
-        String command = update.message().text();
-        if (command.startsWith("/")) {
-            command = command.substring(1);
-        } else {
-            return null;
-        }
+    public HandlerInterface returnUpdateHandler(Update update) {
+        if (!update.message().text().startsWith("/")) return null;
+        String command = update.message().text().replace("/", "");
         return super.getSpecificHandler(command);
     }
 }

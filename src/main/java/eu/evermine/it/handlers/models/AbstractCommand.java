@@ -1,10 +1,9 @@
 package eu.evermine.it.handlers.models;
 
 import com.pengrad.telegrambot.model.Update;
-import eu.evermine.it.updatesdispatcher.handlers.HandlerInterface;
+import io.github.justlel.models.HandlerInterface;
 
 public abstract class AbstractCommand implements HandlerInterface {
-
 
     public Long getCommandUserId(Update update) {
         return update.message().from().id();

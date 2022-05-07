@@ -6,7 +6,7 @@ import eu.evermine.it.EvermineSupportBot;
 import eu.evermine.it.configs.yamls.LanguageYaml;
 import eu.evermine.it.configs.yamls.StaffChatYaml;
 import eu.evermine.it.handlers.models.AbstractCommand;
-import eu.evermine.it.helpers.ActionsAPIHelper;
+import io.github.justlel.api.ActionsAPIHelper;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,7 +25,7 @@ public class StartCommand extends AbstractCommand {
      * @param update L'update da processare.
      */
     @Override
-    public boolean handleUpdate(Update update) {
+    public void handleUpdate(Update update) {
         // Mi assicuro che l'utente non sia in chat con lo staff
         try {
             StaffChatYaml.removeInChatUser(getCommandUserId(update));
@@ -46,7 +46,6 @@ public class StartCommand extends AbstractCommand {
 
         // Invio il messaggio.
         ActionsAPIHelper.sendMessage(text.toString(), getCommandChatId(update), getCommandMessageId(update), inlineKeyboardMarkup);
-        return true;
     }
 
     @Override

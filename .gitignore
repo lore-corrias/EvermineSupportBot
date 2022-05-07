@@ -105,6 +105,6 @@ modules.xml
 target/
 
 # Configs
-config/
+configs/
 
 dependency-reduced-pom.xml
